@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>SIMBA PASAR — Etnomatematika Bilangan Cacah Kelas 5 SD</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fredoka & Nunito (Ramah anak, bulat, kontras tinggi & mudah terbaca) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fredoka', 'sans-serif'],
+            sans: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            pasar: {
+              cream: '#FFFDF7',
+              warm: '#FEF3C7',
+              terracotta: '#D97706',
+              batik: '#92400E',
+              leaf: '#15803D',
+              leafLight: '#DCFCE7',
+              sky: '#0369A1',
+              skyLight: '#E0F2FE',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Pola anyaman bambu / batik halus untuk latar pasar tradisional yang hangat */
+    body {
+      background-color: #FFFBF0;
+      background-image:
+        radial-gradient(#FDE68A 1px, transparent 1px),
+        radial-gradient(#FCD34D 1px, #FFFBF0 1px);
+      background-size: 36px 36px;
+      background-position: 0 0, 18px 18px;
+      font-family: 'Nunito', sans-serif;
+      color: #1F2937;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Fredoka', sans-serif;
+    // Mengucapkan teks bahasa Indonesia menggunakan Web Speech API (khusus dipanggil di Materi Membaca & Menulis)
+    function speakIndonesian(text) {
+      if (appState.soundMuted) return;
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'id-ID';
+          utter.rate = 0.95;
+          utter.pitch = 1.05;
+          const voices = window.speechSynthesis.getVoices();
+          const idVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
+          if (idVoice) utter.voice = idVoice;
+          window.speechSynthesis.speak(utter);
+        }
+      } catch (e) {
+        // Fallback chime sudah jalan
+      }
+    }
+
+    function toggleSoundMuted() {
+      appState.soundMuted = !appState.soundMuted;
+      const icon = document.getElementById('sound-icon');
+      const label = document.getElementById('sound-label');
+      if (appState.soundMuted) {
+        icon.innerHTML = '&#128263;';
+        label.textContent = 'Suara Mati';
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        showToast('Suara dimatikan.', 'info');
+      } else {
+        icon.innerHTML = '&#128266;';
+        label.textContent = 'Suara Aktif';
+        playClickTone(660, 0.12);
+        showToast('Suara diaktifkan.', 'info');
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-200 selection:text-amber-900">
+
+  <!-- TOAST / KOTAK PESAN NOTIFIKASI PENGGANTI ALERT() -->
+  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- HEADER & NAVIGASI UTAMA (Muncul setelah siswa masuk dari layar pembuka) -->
+  <header id="app-header" class="hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-4 border-amber-400 shadow-sm">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Logo & Identitas -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md shrink-0">
+          <!-- Ikon SVG Gapura Pasar -->
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-6 9 6M4 10h16v10H4V10zm5 4v6m6-6v6" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-display text-lg sm:text-xl font-bold text-amber-900 leading-none block">SIMBA PASAR</span>
+          <span id="header-student-info" class="text-xs sm:text-sm font-bold text-emerald-700 block mt-0.5">Siswa Kelas 5 SD</span>
+        </div>
+      </div>
+
+      <!-- Tombol Kontrol Suara + Menu Navigasi Non-Linear -->
+      <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 w-full sm:w-auto justify-between sm:justify-end">
+        <button onclick="toggleSoundMuted()" id="btn-sound-toggle" title="Aktifkan / Matikan Suara"
+          class="px-2.5 py-2 rounded-xl text-xs font-extrabold border-2 border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 transition flex items-center gap-1 shrink-0 cursor-pointer">
+          <span id="sound-icon">&#128266;</span>
+          <span id="sound-label" class="hidden md:inline">Suara Aktif</span>
+        </button>
+        <nav aria-label="Menu Utama" class="flex items-center gap-1.5 sm:gap-2">
+          <button onclick="navigateTo('guide')" data-nav="guide" class="nav-btn px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <span>Petunjuk</span>
+          </button>
+          <button onclick="navigateTo('materi')" data-nav="materi" class="nav-btn px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <span>1. Materi</span>
+          </button>
+          <button onclick="navigateTo('kasir')" data-nav="kasir" class="nav-btn px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <span>2. Simulasi Pasar</span>
+          </button>
+          <button onclick="navigateTo('kuis')" data-nav="kuis" class="nav-btn px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <span>3. Kuis (10)</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
+
+    <!-- =========================================================
+         HALAMAN 0: LAYAR PEMBUKA (WELCOME & IDENTITAS SISWA)
+         ========================================================= -->
+    <section id="view-welcome" class="animate-pop max-w-2xl mx-auto">
+      <div class="bg-white rounded-3xl border-4 border-amber-400 shadow-xl overflow-hidden">
+        <!-- Banner Ilustrasi Pasar Tradisional SVG -->
+        <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 p-6 sm:p-8 text-white text-center relative overflow-hidden">
+          <div class="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-xs sm:text-sm font-extrabold tracking-wide uppercase mb-3 border border-white/30">
+            Matematika Kelas 5 SD • Etnomatematika Nusantara
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-bold tracking-tight drop-shadow-sm mb-2">SIMBA PASAR</h1>
+          <p class="text-amber-50 text-sm sm:text-lg font-semibold max-w-lg mx-auto">
+            Simulasi Belanja Pasar Tradisional untuk Belajar Bilangan Cacah sampai dengan 100.000
+          </p>
+
+          <!-- Ilustrasi SVG Kios Pasar Tradisional -->
+          <div class="mt-5 flex justify-center">
+            <svg class="w-64 sm:w-80 h-28 drop-shadow-md" viewBox="0 0 320 110" fill="none">
+              <!-- Atap Tenda Pasar Merah Putih / Kuning -->
+              <path d="M20 40 L45 10 L275 10 L300 40 Z" fill="#FEF3C7" stroke="#78350F" stroke-width="3"/>
+              <path d="M45 10 L75 40 L105 10 L135 40 L165 10 L195 40 L225 10 L255 40 L275 10" fill="#DC2626" opacity="0.85"/>
+              <!-- Rumbai Tenda -->
+              <rect x="20" y="40" width="280" height="10" rx="5" fill="#B45309"/>
+              <!-- Tiang Kios -->
+              <rect x="38" y="50" width="8" height="48" fill="#78350F"/>
+              <rect x="274" y="50" width="8" height="48" fill="#78350F"/>
+              <!-- Meja Dagangan -->
+              <rect x="25" y="76" width="270" height="24" rx="6" fill="#D97706" stroke="#78350F" stroke-width="3"/>
+              <!-- Keranjang Sayur & Buah -->
+              <ellipse cx="85" cy="74" rx="26" ry="10" fill="#92400E"/>
+              <circle cx="78" cy="68" r="8" fill="#16A34A"/>
+              <circle cx="92" cy="68" r="8" fill="#22C55E"/>
+              <circle cx="85" cy="62" r="7" fill="#EF4444"/>
+              <!-- Timbangan Tradisional -->
+              <rect x="148" y="62" width="24" height="14" rx="3" fill="#0284C7" stroke="#0C4A6E" stroke-width="2"/>
+              <circle cx="160" cy="69" r="4" fill="#FFFFFF"/>
+              <path d="M142 56 Q160 64 178 56" stroke="#FBBF24" stroke-width="4" stroke-linecap="round"/>
+              <!-- Karung Beras -->
+              <rect x="210" y="54" width="36" height="24" rx="8" fill="#FEF9C3" stroke="#A16207" stroke-width="2.5"/>
+              <text x="228" y="70" text-anchor="middle" font-size="8" font-weight="bold" fill="#854D0E">BERAS</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Form Input Nama & Kelas -->
+        <div class="p-6 sm:p-8 space-y-5">
+          <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 text-sm sm:text-base text-amber-900">
+            <p class="font-bold">Halo, Sahabat Kasir Cilik!</p>
+            <p class="mt-1">Masukkan nama lengkap dan kelasmu terlebih dahulu agar namamu tercatat pada <strong>Sertifikat Kelulusan</strong> di akhir pembelajaran.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label for="input-student-name" class="block text-sm font-extrabold text-gray-700 mb-1.5">Nama Lengkap Siswa</label>
+              <input id="input-student-name" type="text" placeholder="Contoh: Salwa Cahya" maxlength="40"
+                class="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none text-base font-bold text-gray-800 transition" />
+            </div>
+            <div>
+              <label for="input-student-class" class="block text-sm font-extrabold text-gray-700 mb-1.5">Kelas</label>
+              <input id="input-student-class" type="text" value="5 SD" maxlength="15"
+                class="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none text-base font-bold text-gray-800 transition" />
+            </div>
+          </div>
+
+          <button onclick="startApplication()" class="btn-3d w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-display text-xl font-bold shadow-lg shadow-emerald-200 border-b-4 border-emerald-800 flex items-center justify-center gap-3 cursor-pointer">
+            <span>Mulai Belajar & Bermain</span>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         HALAMAN 1: PETUNJUK PENGGUNAAN & TUJUAN PEMBELAJARAN (Revisi #7 & #8)
+         ========================================================= -->
+    <section id="view-guide" class="hidden animate-pop space-y-6">
+      <div class="bg-white rounded-3xl border-4 border-sky-300 p-5 sm:p-8 shadow-md">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-sky-100 pb-4 mb-5">
+          <div>
+            <span class="inline-block bg-sky-100 text-sky-800 text-xs font-extrabold px-3 py-1 rounded-full uppercase">Panduan Belajar</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-sky-950 mt-1">Tujuan Pembelajaran & Petunjuk Media</h2>
+          </div>
+          <button onclick="navigateTo('materi')" class="btn-3d px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm sm:text-base border-b-4 border-amber-700 shadow cursor-pointer">
+            Lanjut ke Materi &rarr;
+          </button>
+        </div>
+
+        <!-- Tujuan Pembelajaran -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-sky-50/80 border-2 border-sky-200 rounded-2xl p-5">
+            <h3 class="text-lg sm:text-xl font-bold text-sky-900 mb-3 flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center text-sm font-extrabold">TP</span>
+              Tujuan Pembelajaran (Kelas 5 SD)
+            </h3>
+            <ul class="space-y-2.5 text-sm sm:text-base text-gray-700 font-semibold">
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-extrabold mt-0.5">&#10003;</span>
+                <span><strong>Membaca dan menulis</strong> bilangan cacah sampai dengan 100.000 dengan tepat melalui daftar harga barang pasar.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-extrabold mt-0.5">&#10003;</span>
+                <span><strong>Menentukan nilai tempat</strong> (Puluh Ribuan, Ribuan, Ratusan, Puluhan, Satuan) dari total belanja.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-extrabold mt-0.5">&#10003;</span>
+                <span><strong>Membandingkan dan mengurutkan</strong> bilangan cacah sampai 100.000.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-extrabold mt-0.5">&#10003;</span>
+                <span><strong>Mengenal etnomatematika pasar tradisional</strong> (satuan ikat, lusin, kodi, literan, bungkus, serta budaya tawar-menawar harga).</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-extrabold mt-0.5">&#10003;</span>
+                <span><strong>Menyelesaikan operasi hitung</strong> penjumlahan belanja dan pengurangan uang kembalian pecahan Rupiah.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Alur & Fungsi Tombol Navigasi -->
+          <div class="bg-amber-50/80 border-2 border-amber-200 rounded-2xl p-5">
+            <h3 class="text-lg sm:text-xl font-bold text-amber-900 mb-3 flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center text-sm font-extrabold">?</span>
+              Alur Belajar & Fungsi Tombol
+            </h3>
+            <div class="space-y-3 text-sm sm:text-base text-gray-700">
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="font-extrabold text-amber-800 block">Menu Bebas di Bagian Atas:</span>
+                <span>Kamu bebas berpindah kapan saja antara <strong>Petunjuk</strong>, <strong>1. Materi</strong>, <strong>2. Simulasi Pasar</strong>, dan <strong>3. Kuis (10 Soal)</strong> sesuai kebutuhan belajarmu.</span>
+              </div>
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="font-extrabold text-emerald-800 block">Dua Sudut Pandang (POV) Simulasi Pasar:</span>
+                <span><strong>POV Pembeli:</strong> Kamu menjalankan misi belanja dari Ibu (memilih barang sesuai catatan Ibu, menawar harga, mengurai nilai tempat, dan menghitung uang kembalian yang diterima).<br/>
+                <strong>POV Penjual:</strong> Kamu menjadi kasir pasar yang melayani daftar pesanan pelanggan (menanggapi tawaran harga, input nilai tempat di kasir, dan menyusun kembalian pelanggan).</span>
+              </div>
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="font-extrabold text-sky-800 block">Batas Maksimal Transaksi Rp99.999:</span>
+                <span>Semua transaksi dirancang pada rentang bilangan cacah kelas 5 SD dengan batas maksimal <strong>Rp99.999</strong>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Kartu Pilihan Menu Cepat -->
+        <div class="mt-6 pt-5 border-t-2 border-gray-100">
+          <p class="text-center font-extrabold text-gray-700 mb-4">Pilih Kegiatan yang Ingin Kamu Mulai Sekarang:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button onclick="navigateTo('materi')" class="btn-3d p-5 rounded-2xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 text-left transition cursor-pointer">
+              <div class="text-xs font-extrabold uppercase text-amber-800">Langkah 1</div>
+              <div class="font-display text-xl font-bold text-amber-950 mt-0.5">Materi & Etnomatematika</div>
+              <p class="text-xs sm:text-sm text-amber-900 mt-1">Belajar satuan pasar tradisional, membaca, menulis & nilai tempat bilangan.</p>
+            </button>
+            <button onclick="navigateTo('kasir')" class="btn-3d p-5 rounded-2xl bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-400 text-left transition cursor-pointer">
+              <div class="text-xs font-extrabold uppercase text-emerald-800">Langkah 2</div>
+              <div class="font-display text-xl font-bold text-emerald-950 mt-0.5">Simulasi Pasar (2 POV)</div>
+              <p class="text-xs sm:text-sm text-emerald-900 mt-1">Mainkan peran sebagai <strong>Pembeli (Misi Ibu)</strong> atau <strong>Penjual (Kasir)</strong>.</p>
+            </button>
+            <button onclick="navigateTo('kuis')" class="btn-3d p-5 rounded-2xl bg-sky-100 hover:bg-sky-200 border-2 border-sky-400 text-left transition cursor-pointer">
+              <div class="text-xs font-extrabold uppercase text-sky-800">Langkah 3</div>
+              <div class="font-display text-xl font-bold text-sky-950 mt-0.5">Kuis Evaluasi (10 Soal)</div>
+              <p class="text-xs sm:text-sm text-sky-900 mt-1">Uji pemahamanmu dengan 10 soal lengkap pembahasan & raih sertifikat!</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         HALAMAN 2: MATERI & ETNOMATEMATIKA PASAR (Revisi #2, #10, #13)
+         ========================================================= -->
+    <section id="view-materi" class="hidden animate-pop space-y-6">
+      <!-- Sub-tab Materi -->
+      <div class="bg-white rounded-3xl border-4 border-amber-300 p-4 sm:p-6 shadow-md">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <span class="bg-amber-100 text-amber-800 text-xs font-extrabold px-3 py-1 rounded-full uppercase">Ruang Belajar</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-amber-950 mt-1">Materi Bilangan Cacah & Etnomatematika</h2>
+          </div>
+          <button onclick="navigateTo('kasir')" class="btn-3d px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm border-b-4 border-emerald-800 cursor-pointer">
+            Praktik di Kasir &rarr;
+          </button>
+        </div>
+
+        <!-- Tab Selector Materi -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-amber-50 p-2 rounded-2xl border-2 border-amber-200 mb-6">
+          <button onclick="switchMateriTab('etno')" id="tab-materi-etno" class="materi-tab py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition cursor-pointer">
+            A. Etnomatematika Pasar
+          </button>
+          <button onclick="switchMateriTab('baca')" id="tab-materi-baca" class="materi-tab py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition cursor-pointer">
+            B. Membaca & Menulis Angka
+          </button>
+          <button onclick="switchMateriTab('tempat')" id="tab-materi-tempat" class="materi-tab py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition cursor-pointer">
+            C. Nilai Tempat & Bandingkan
+          </button>
+        </div>
+
+        <!-- TAB A: ETNOMATEMATIKA PASAR TRADISIONAL (Revisi #2) -->
+        <div id="panel-materi-etno" class="space-y-5">
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-5">
+            <h3 class="text-xl font-bold text-amber-950 mb-2">Apa itu Etnomatematika di Pasar Tradisional?</h3>
+            <p class="text-gray-700 text-sm sm:text-base leading-relaxed">
+              <strong>Etnomatematika</strong> adalah penerapan konsep matematika yang hidup dalam budaya masyarakat sehari-hari. Di pasar tradisional Nusantara, pedagang dan pembeli menggunakan <strong>satuan ukur lokal</strong> serta tradisi <strong>tawar-menawar</strong> yang melatih berhitung cepat!
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white border-2 border-emerald-200 rounded-2xl p-4 shadow-sm">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center mb-2">1 Ikat</div>
+              <h4 class="font-bold text-lg text-gray-900">Satuan Ikat</h4>
+              <p class="text-sm text-gray-600 mt-1">Digunakan untuk sayuran hijau seperti bayam, kangkung, dan kacang panjang yang diikat tali bambu/rafia. Misal: <strong>1 ikat bayam = Rp3.500</strong>.</p>
+            </div>
+            <div class="bg-white border-2 border-amber-200 rounded-2xl p-4 shadow-sm">
+              <div class="w-12 h-10 rounded-xl bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center mb-2">Literan</div>
+              <h4 class="font-bold text-lg text-gray-900">Satuan Takar Literan</h4>
+              <p class="text-sm text-gray-600 mt-1">Pedagang beras tradisional menakar beras memakai kaleng takar 1 liter. Jika 1 liter Rp12.900, maka <strong>5 liter beras = Rp64.500</strong>.</p>
+            </div>
+            <div class="bg-white border-2 border-sky-200 rounded-2xl p-4 shadow-sm">
+              <div class="w-14 h-10 rounded-xl bg-sky-100 text-sky-800 font-extrabold flex items-center justify-center mb-2">1 Lusin</div>
+              <h4 class="font-bold text-lg text-gray-900">Satuan Lusin (12 Buah)</h4>
+              <p class="text-sm text-gray-600 mt-1">Digunakan untuk pisau dapur, gelas, atau sisir pisang berisi 12 buah. <strong>1 lusin = 12 buah</strong>. Contoh: 1 sisir pisang kepok isi 12 = Rp15.500.</p>
+            </div>
+            <div class="bg-white border-2 border-purple-200 rounded-2xl p-4 shadow-sm">
+              <div class="w-14 h-10 rounded-xl bg-purple-100 text-purple-800 font-extrabold flex items-center justify-center mb-2">1 Kodi</div>
+              <h4 class="font-bold text-lg text-gray-900">Satuan Kodi (20 Helai)</h4>
+              <p class="text-sm text-gray-600 mt-1">Khas pedagang kain batik, sarung, atau pakaian di pasar. <strong>1 kodi = 20 helai</strong>. Jika beli eceran 1 helai sarung = Rp42.000.</p>
+            </div>
+            <div class="bg-white border-2 border-rose-200 rounded-2xl p-4 shadow-sm">
+              <div class="w-16 h-10 rounded-xl bg-rose-100 text-rose-800 font-extrabold flex items-center justify-center mb-2">Bungkus</div>
+              <h4 class="font-bold text-lg text-gray-900">Satuan Bungkus / Ekor</h4>
+              <p class="text-sm text-gray-600 mt-1">Tahu dan tempe dijual per bungkus (isi 10 potong = Rp6.000), sedangkan ayam potong dijual per <strong>1 ekor</strong> (Rp34.000).</p>
+            </div>
+            <div class="bg-white border-2 border-orange-300 rounded-2xl p-4 shadow-sm">
+              <div class="w-16 h-10 rounded-xl bg-orange-100 text-orange-800 font-extrabold flex items-center justify-center mb-2">Tawar</div>
+              <h4 class="font-bold text-lg text-gray-900">Budaya Tawar-Menawar</h4>
+              <p class="text-sm text-gray-600 mt-1">Pembeli menawar harga dengan santun, sehingga terjadi pengurangan harga kesepakatan (misal Rp48.500 ditawar turun Rp2.500 menjadi <strong>Rp46.000</strong>).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB B: MEMBACA & MENULIS LAMBANG BILANGAN (Revisi #10 & #13) -->
+        <div id="panel-materi-baca" class="hidden space-y-6">
+          <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 sm:p-5">
+            <h3 class="text-lg sm:text-xl font-bold text-sky-950 mb-1">1. Contoh Membaca & Menulis Bilangan (5 Contoh Bertahap)</h3>
+            <p class="text-sm text-gray-700 mb-4">Klik tombol <strong>Dengar Suara</strong> pada setiap kartu untuk mendengar pelafalan dan melihat pemenggalan suku katanya!</p>
+
+            <div id="reading-examples-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <!-- Diisi via JavaScript (6 contoh bertahap dari 4 digit hingga 100.000) -->
+            </div>
+          </div>
+
+          <!-- Latihan Interaktif Menulis Lambang Bilangan dari Nama Bilangan (Revisi #10) -->
+          <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <span class="bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg uppercase">Latihan Mandiri</span>
+                <h3 class="text-lg sm:text-xl font-bold text-emerald-950 mt-1">2. Latihan Menulis Lambang Bilangan</h3>
+              </div>
+              <span id="write-practice-progress" class="text-sm font-extrabold text-emerald-800 bg-white px-3 py-1 rounded-xl border border-emerald-300">Soal 1 / 5</span>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-200 space-y-4">
+              <p class="text-sm font-bold text-gray-600">Tuliskan lambang bilangan (angka) dari nama bilangan berikut:</p>
+              <div id="write-question-text" class="text-lg sm:text-2xl font-display font-bold text-amber-900 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                "Tujuh puluh empat ribu lima ratus dua puluh"
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-gray-400">Rp</span>
+                  <input id="write-answer-input" type="text" inputmode="numeric" placeholder="Ketik angka, misal: 74520 atau 74.520"
+                    class="w-full pl-11 pr-4 py-3.5 rounded-xl border-2 border-gray-300 focus:border-emerald-500 outline-none text-lg font-extrabold text-gray-900" />
+                </div>
+                <button onclick="checkWritePractice()" class="btn-3d px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-b-4 border-emerald-800 cursor-pointer">
+                  Cek Jawaban
+                </button>
+                <button onclick="nextWritePractice()" class="btn-3d px-5 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold border-b-4 border-amber-700 cursor-pointer">
+                  Soal Lain &rarr;
+                </button>
+              </div>
+              <div id="write-practice-feedback" class="hidden p-3.5 rounded-xl text-sm sm:text-base font-bold"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB C: NILAI TEMPAT & MEMBANDINGKAN BILANGAN -->
+        <div id="panel-materi-tempat" class="hidden space-y-6">
+          <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
+            <h3 class="text-lg sm:text-xl font-bold text-amber-950 mb-2">Eksplorasi Nilai Tempat Interaktif (Hingga 5 Digit)</h3>
+            <p class="text-sm text-gray-700 mb-4">Klik angka-angka di bawah atau pilih contoh harga barang untuk melihat posisi nilai tempatnya!</p>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <button onclick="setPlaceExplorer(47850)" class="px-3.5 py-2 rounded-xl bg-white border-2 border-amber-300 hover:bg-amber-100 font-bold text-sm cursor-pointer">Rp47.850</button>
+              <button onclick="setPlaceExplorer(95204)" class="px-3.5 py-2 rounded-xl bg-white border-2 border-amber-300 hover:bg-amber-100 font-bold text-sm cursor-pointer">Rp95.204</button>
+              <button onclick="setPlaceExplorer(64500)" class="px-3.5 py-2 rounded-xl bg-white border-2 border-amber-300 hover:bg-amber-100 font-bold text-sm cursor-pointer">Rp64.500</button>
+              <button onclick="setPlaceExplorer(80395)" class="px-3.5 py-2 rounded-xl bg-white border-2 border-amber-300 hover:bg-amber-100 font-bold text-sm cursor-pointer">Rp80.395</button>
+            </div>
+
+            <!-- Tabel 5 Kotak Nilai Tempat -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-center">
+              <div class="bg-rose-100 border-2 border-rose-300 rounded-2xl p-3">
+                <div class="text-xs font-extrabold text-rose-800 uppercase">Puluh Ribuan</div>
+                <div id="pv-exp-0" class="text-3xl font-display font-bold text-rose-950 my-1">6</div>
+                <div id="pv-val-0" class="text-xs font-bold text-rose-700 bg-white/80 rounded-lg py-1">60.000</div>
+              </div>
+              <div class="bg-orange-100 border-2 border-orange-300 rounded-2xl p-3">
+                <div class="text-xs font-extrabold text-orange-800 uppercase">Ribuan</div>
+                <div id="pv-exp-1" class="text-3xl font-display font-bold text-orange-950 my-1">4</div>
+                <div id="pv-val-1" class="text-xs font-bold text-orange-700 bg-white/80 rounded-lg py-1">4.000</div>
+              </div>
+              <div class="bg-amber-100 border-2 border-amber-300 rounded-2xl p-3">
+                <div class="text-xs font-extrabold text-amber-800 uppercase">Ratusan</div>
+                <div id="pv-exp-2" class="text-3xl font-display font-bold text-amber-950 my-1">5</div>
+                <div id="pv-val-2" class="text-xs font-bold text-amber-700 bg-white/80 rounded-lg py-1">500</div>
+              </div>
+              <div class="bg-emerald-100 border-2 border-emerald-300 rounded-2xl p-3">
+                <div class="text-xs font-extrabold text-emerald-800 uppercase">Puluhan</div>
+                <div id="pv-exp-3" class="text-3xl font-display font-bold text-emerald-950 my-1">0</div>
+                <div id="pv-val-3" class="text-xs font-bold text-emerald-700 bg-white/80 rounded-lg py-1">0</div>
+              </div>
+              <div class="col-span-2 sm:col-span-1 bg-sky-100 border-2 border-sky-300 rounded-2xl p-3">
+                <div class="text-xs font-extrabold text-sky-800 uppercase">Satuan</div>
+                <div id="pv-exp-4" class="text-3xl font-display font-bold text-sky-950 my-1">0</div>
+                <div id="pv-val-4" class="text-xs font-bold text-sky-700 bg-white/80 rounded-lg py-1">0</div>
+              </div>
+            </div>
+            <div id="pv-exp-summary" class="mt-3 bg-white p-3 rounded-xl border border-amber-200 text-center font-bold text-sm sm:text-base text-gray-800">
+              64.500 = 60.000 + 4.000 + 500 + 0 + 0 (Enam puluh empat ribu lima ratus)
+            </div>
+          </div>
+
+          <!-- Cara Membandingkan & Mengurutkan -->
+          <div class="bg-white border-2 border-sky-200 rounded-2xl p-5">
+            <h3 class="text-lg font-bold text-sky-950 mb-2">Cara Membandingkan & Mengurutkan Bilangan Cacah</h3>
+            <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
+              Bandingkan mulai dari nilai tempat paling kiri (<strong>Puluh Ribuan</strong>). Jika sama, lanjutkan ke <strong>Ribuan</strong>, lalu <strong>Ratusan</strong>, dst.<br/>
+              Contoh: Membandingkan harga Ikan Nila (<strong>Rp28.500</strong>) dan Telur Ayam (<strong>Rp27.000</strong>).<br/>
+              Angka puluh ribuan sama-sama <strong>2</strong> (20.000). Pada nilai tempat ribuan, <strong>8 &gt; 7</strong>, maka <strong>28.500 &gt; 27.000</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         HALAMAN 3: SIMULASI PASAR DUA POV (PEMBELI & PENJUAL)
+         ========================================================= -->
+    <section id="view-kasir" class="hidden animate-pop space-y-5">
+      <!-- GERBANG PEMILIHAN POV TEPAT SEBELUM SIMULASI DIMULAI -->
+      <div id="pov-gate-card" class="bg-white rounded-3xl border-4 border-emerald-400 p-5 sm:p-7 shadow-lg space-y-5">
+        <div class="text-center max-w-2xl mx-auto">
+          <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-extrabold px-3 py-1 rounded-full uppercase">Sebelum Memulai Simulasi</span>
+          <h2 class="text-2xl sm:text-3xl font-display font-bold text-gray-900 mt-1">Pilih Peran (POV) Simulasi Pasar</h2>
+          <p class="text-sm sm:text-base text-gray-600 font-semibold mt-1">
+            Tentukan peranmu terlebih dahulu sebelum masuk ke lapak pasar tradisional!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- POV Pembeli -->
+          <div class="rounded-2xl border-2 border-emerald-300 bg-emerald-50/70 p-5 flex flex-col justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <div>
+                <span class="text-xs font-extrabold uppercase text-emerald-700 block">POV Pembeli</span>
+                <h3 class="font-display text-xl font-bold text-gray-900">Misi Belanja dari Ibu</h3>
+                <p class="text-xs sm:text-sm text-gray-700 font-semibold mt-1">
+                  Kamu mendapat misi dari Ibu membawa uang saku, memilih barang pesanan Ibu di etalase, menawar harga ke pedagang, mengurai nilai tempat, lalu menyusun uang kembaliannya.
+                </p>
+              </div>
+            </div>
+            <button onclick="enterSimulationWithRole('buyer')" class="btn-3d w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base border-b-4 border-emerald-800 cursor-pointer">
+              Masuk Simulasi sebagai PEMBELI &rarr;
+            </button>
+          </div>
+
+          <!-- POV Penjual -->
+          <div class="rounded-2xl border-2 border-amber-300 bg-amber-50/70 p-5 flex flex-col justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <span class="text-xs font-extrabold uppercase text-amber-800 block">POV Penjual / Kasir</span>
+                <h3 class="font-display text-xl font-bold text-gray-900">Melayani Pelanggan Pasar</h3>
+                <p class="text-xs sm:text-sm text-gray-700 font-semibold mt-1">
+                  Kamu menjaga lapak pasar, melayani daftar belanja pelanggan, menanggapi tawaran harga, menginput nilai tempat di mesin kasir, dan menyusun uang kembalian pelanggan.
+                </p>
+              </div>
+            </div>
+            <button onclick="enterSimulationWithRole('seller')" class="btn-3d w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm sm:text-base border-b-4 border-amber-800 cursor-pointer">
+              Masuk Simulasi sebagai PENJUAL &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AREA AKTIF SIMULASI PASAR (Tampil setelah memilih POV di atas) -->
+      <div id="simulation-active-area" class="hidden space-y-5">
+        <div class="bg-white rounded-3xl border-4 border-emerald-400 p-4 sm:p-5 shadow-md space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="backToPovGate()" class="btn-3d px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs border border-gray-300 cursor-pointer">
+                &larr; Ganti POV
+              </button>
+              <div>
+                <span id="active-role-subtitle" class="text-xs font-extrabold uppercase text-emerald-700 tracking-wide">Mode POV</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Simulasi Jual Beli Pasar Tradisional</h2>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold">
+                Maks. Rp99.999
+              </span>
+              <button onclick="nextRoleMission()" class="btn-3d px-3.5 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 font-extrabold text-xs sm:text-sm border border-sky-300 cursor-pointer">
+                Ganti Misi / Pelanggan
+              </button>
+            </div>
+          </div>
+
+          <!-- KARTU CERITA MISI KONKRET SESUAI POV & NAMA SISWA -->
+          <div id="mission-story-banner" class="rounded-2xl p-4 sm:p-5 border-2 bg-emerald-50/90 border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+              <div id="mission-avatar-box" class="shrink-0"></div>
+              <div>
+                <span id="mission-badge-text" class="inline-block bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                  Misi Belanja #1
+                </span>
+                <h3 id="mission-headline" class="font-display text-lg sm:text-xl font-bold text-gray-900 mt-1">
+                  Pesanan Belanja dari Ibu
+                </h3>
+                <p id="mission-narrative" class="text-sm sm:text-base text-gray-800 mt-1 leading-relaxed">
+                  Memuat cerita misi...
+                </p>
+              </div>
+            </div>
+            <div class="bg-white px-4 py-2.5 rounded-2xl border-2 border-amber-300 text-center shrink-0 w-full sm:w-auto">
+              <div id="mission-budget-label" class="text-[11px] font-extrabold uppercase text-amber-800">Uang Saku dari Ibu</div>
+              <div id="mission-budget-amount" class="font-display text-xl sm:text-2xl font-bold text-emerald-700">Rp85.000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indikator Tahap Dinamis -->
+        <div id="kasir-steps-bar" class="grid grid-cols-4 gap-2 text-center">
+          <div id="step-pill-1" class="py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2">1. Pilih Barang</div>
+          <div id="step-pill-2" class="py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2">2. Tawar-Menawar</div>
+          <div id="step-pill-3" class="py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2">3. Nilai Tempat</div>
+          <div id="step-pill-4" class="py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2">4. Kembalian</div>
+        </div>
+
+        <!-- LAYOUT 2 KOLOM: KIRI (Area Interaktif POV), KANAN (Catatan / Struk Belanja) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+          <!-- AREA INTERAKTIF UTAMA (7 Kolom di Desktop) -->
+          <div class="lg:col-span-7 space-y-4">
+
+            <!-- TAHAP 1 (KHUSUS POV PEMBELI): KATALOG BARANG PASAR SESUAI CATATAN IBU -->
+            <div id="kasir-stage-1" class="bg-white rounded-3xl border-2 border-amber-300 p-4 sm:p-5 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div>
+                  <h3 class="text-lg sm:text-xl font-bold text-amber-950">Etalase Lapak Pasar Tradisional</h3>
+                  <p id="stage-1-instruction" class="text-xs sm:text-sm text-gray-600">
+                    Klik barang-barang yang dipesan Ibu sesuai daftar di atas.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Grid Katalog Barang -->
+              <div id="market-catalog-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            </div>
+
+            <!-- TAHAP 2: TAWAR-MENAWAR -->
+            <div id="kasir-stage-2" class="hidden bg-white rounded-3xl border-2 border-orange-300 p-5 shadow-sm space-y-4">
+              <div class="flex items-start gap-3 bg-orange-50 border-2 border-orange-200 rounded-2xl p-4">
+                <svg class="w-14 h-14 shrink-0" viewBox="0 0 64 64" fill="none">
+                  <circle cx="32" cy="32" r="30" fill="#FED7AA" stroke="#EA580C" stroke-width="2.5"/>
+                  <circle cx="32" cy="25" r="11" fill="#FDBA74"/>
+                  <path d="M18 24 C18 12, 46 12, 46 24" fill="#7C2D12"/>
+                  <circle cx="28" cy="24" r="1.8" fill="#1F2937"/>
+                  <circle cx="36" cy="24" r="1.8" fill="#1F2937"/>
+                  <path d="M28 29 Q32 33 36 29" stroke="#9A3412" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M14 54 C16 40, 48 40, 50 54" fill="#0D9488"/>
+                </svg>
+                <div>
+                  <span id="bargain-role-badge" class="bg-orange-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                    Etnomatematika Tawar-Menawar
+                  </span>
+                  <h3 id="bargain-title" class="text-lg font-bold text-orange-950 mt-1">Tawar-Menawar di Lapak Pasar</h3>
+                  <p id="bargain-dialogue" class="text-sm sm:text-base text-gray-800 mt-1">
+                    Memuat dialog tawar-menawar...
+                  </p>
+                </div>
+              </div>
+
+              <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-3">
+                <div class="flex justify-between text-sm sm:text-base font-bold">
+                  <span>Total Harga Awal:</span>
+                  <span id="bargain-orig-price" class="text-gray-900">Rp0</span>
+                </div>
+                <div class="flex justify-between text-sm sm:text-base font-bold text-rose-700">
+                  <span>Potongan Harga Tawar-Menawar:</span>
+                  <span id="bargain-discount">- Rp0</span>
+                </div>
+                <hr class="border-amber-300" />
+                <label for="bargain-input" id="bargain-input-label" class="block text-sm font-extrabold text-amber-950">
+                  Berapa Total Harga Akhir Setelah Tawar-Menawar?
+                </label>
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                  <div class="relative flex-1">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-extrabold text-gray-400">Rp</span>
+                    <input id="bargain-input" type="text" inputmode="numeric" placeholder="Contoh: 68500"
+                      class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-amber-400 focus:border-emerald-600 outline-none text-lg font-extrabold" />
+                  </div>
+                  <button onclick="verifyBargainPrice()" id="btn-verify-bargain" class="btn-3d px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-b-4 border-emerald-800 cursor-pointer">
+                    Sepakati Harga
+                  </button>
+                </div>
+                <div id="bargain-feedback" class="hidden p-3 rounded-xl text-sm font-bold"></div>
+              </div>
+            </div>
+
+            <!-- TAHAP 3: URAIKAN NILAI TEMPAT 5 DIGIT -->
+            <div id="kasir-stage-3" class="hidden bg-white rounded-3xl border-2 border-sky-300 p-5 shadow-sm space-y-4">
+              <div>
+                <span id="pv-step-tag" class="bg-sky-100 text-sky-800 text-xs font-extrabold px-2.5 py-1 rounded-full uppercase">Tahap Nilai Tempat</span>
+                <h3 id="pv-stage-title" class="text-lg sm:text-xl font-bold text-sky-950 mt-1">Uraikan Total Belanja ke Nilai Tempat</h3>
+                <p class="text-sm text-gray-600">Masukkan angka (0–9) untuk setiap nilai tempat dari total kesepakatan <strong id="pv-target-display" class="text-sky-900">Rp0</strong>:</p>
+              </div>
+
+              <div class="grid grid-cols-5 gap-1.5 sm:gap-3 text-center">
+                <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 sm:p-3">
+                  <label class="block text-[10px] sm:text-xs font-extrabold text-rose-800 leading-tight mb-1.5">Puluh Ribuan</label>
+                  <input id="pv-in-0" type="number" min="0" max="9" maxlength="1" placeholder="0"
+                    class="w-full text-center py-2.5 rounded-xl border-2 border-rose-300 font-display text-xl sm:text-2xl font-bold text-rose-950 focus:border-rose-600 outline-none" />
+                </div>
+                <div class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-2 sm:p-3">
+                  <label class="block text-[10px] sm:text-xs font-extrabold text-orange-800 leading-tight mb-1.5">Ribuan</label>
+                  <input id="pv-in-1" type="number" min="0" max="9" maxlength="1" placeholder="0"
+                    class="w-full text-center py-2.5 rounded-xl border-2 border-orange-300 font-display text-xl sm:text-2xl font-bold text-orange-950 focus:border-rose-600 outline-none" />
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 sm:p-3">
+                  <label class="block text-[10px] sm:text-xs font-extrabold text-amber-800 leading-tight mb-1.5">Ratusan</label>
+                  <input id="pv-in-2" type="number" min="0" max="9" maxlength="1" placeholder="0"
+                    class="w-full text-center py-2.5 rounded-xl border-2 border-amber-300 font-display text-xl sm:text-2xl font-bold text-amber-950 focus:border-rose-600 outline-none" />
+                </div>
+                <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-2 sm:p-3">
+                  <label class="block text-[10px] sm:text-xs font-extrabold text-emerald-800 leading-tight mb-1.5">Puluhan</label>
+                  <input id="pv-in-3" type="number" min="0" max="9" maxlength="1" placeholder="0"
+                    class="w-full text-center py-2.5 rounded-xl border-2 border-emerald-300 font-display text-xl sm:text-2xl font-bold text-emerald-950 focus:border-rose-600 outline-none" />
+                </div>
+                <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-2 sm:p-3">
+                  <label class="block text-[10px] sm:text-xs font-extrabold text-sky-800 leading-tight mb-1.5">Satuan</label>
+                  <input id="pv-in-4" type="number" min="0" max="9" maxlength="1" placeholder="0"
+                    class="w-full text-center py-2.5 rounded-xl border-2 border-sky-300 font-display text-xl sm:text-2xl font-bold text-sky-950 focus:border-rose-600 outline-none" />
+                </div>
+              </div>
+
+              <button onclick="verifyPlaceValue()" class="btn-3d w-full py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-base border-b-4 border-sky-800 cursor-pointer">
+                Periksa Nilai Tempat
+              </button>
+              <div id="pv-feedback" class="hidden p-3.5 rounded-xl text-sm font-bold"></div>
+            </div>
+
+            <!-- TAHAP 4: UANG KEMBALIAN (Diberitahukan nominal kembaliannya agar fokus menyusun pecahan Rupiah) -->
+            <div id="kasir-stage-4" class="hidden bg-white rounded-3xl border-2 border-emerald-300 p-5 shadow-sm space-y-4">
+              <div>
+                <span id="change-step-tag" class="bg-emerald-100 text-emerald-800 text-xs font-extrabold px-2.5 py-1 rounded-full uppercase">Tahap Uang Kembalian</span>
+                <h3 id="change-stage-title" class="text-lg sm:text-xl font-bold text-emerald-950 mt-1">Susun Pecahan Uang Kembalian</h3>
+              </div>
+
+              <!-- Info Uang yang Dibayarkan & Nominal Kembalian yang Diberitahukan -->
+              <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 space-y-2.5">
+                <div id="payment-visual-label" class="text-xs font-extrabold uppercase text-amber-800">Uang yang Dibayarkan:</div>
+                <div id="buyer-payment-visual" class="flex flex-wrap items-center gap-2 py-1"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-amber-200 text-sm">
+                  <div class="bg-white/80 p-2 rounded-xl">Total Belanja: <strong id="pay-summary-total" class="text-gray-900">Rp0</strong></div>
+                  <div class="bg-white/80 p-2 rounded-xl">Uang Dibayar: <strong id="pay-summary-paid" class="text-emerald-800">Rp0</strong></div>
+                  <div class="bg-emerald-100 border border-emerald-300 p-2 rounded-xl text-emerald-950">
+                    Kembalian: <strong id="pay-summary-change-hint" class="font-display text-base text-emerald-800">Rp0</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Laci Pecahan Uang Rupiah SVG -->
+              <div>
+                <p id="drawer-instruction" class="text-xs sm:text-sm font-extrabold text-gray-700 mb-2">
+                  Klik pecahan uang Rupiah di bawah ini untuk menyusun uang kembalian yang pas:
+                </p>
+                <div id="rupiah-drawer-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+              </div>
+
+              <!-- Susunan Kembalian -->
+              <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span id="assembled-label" class="text-sm font-extrabold text-emerald-900">Uang Kembalian yang Disusun:</span>
+                  <div class="flex items-center gap-2">
+                    <span id="assembled-change-total" class="font-display text-xl font-bold text-emerald-800">Rp0</span>
+                    <button onclick="clearAssembledChange()" class="px-3 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-extrabold cursor-pointer">
+                      Hapus Semua
+                    </button>
+                  </div>
+                </div>
+                <div id="assembled-change-list" class="min-h-[48px] flex flex-wrap gap-1.5 items-center bg-white p-2.5 rounded-xl border border-emerald-200">
+                  <span class="text-xs text-gray-400 font-semibold">Belum ada pecahan uang yang dipilih...</span>
+                </div>
+              </div>
+
+              <button onclick="verifyChange()" id="btn-verify-change" class="btn-3d w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-display text-lg font-bold border-b-4 border-emerald-800 shadow cursor-pointer">
+                Periksa Uang Kembalian
+              </button>
+
+              <div id="change-feedback" class="hidden p-4 rounded-2xl text-sm sm:text-base font-bold space-y-3"></div>
+            </div>
+
+          </div>
+
+          <!-- KOLOM KANAN: CATATAN PESANAN & STRUK BELANJA (5 Kolom di Desktop) -->
+          <aside class="lg:col-span-5 bg-white rounded-3xl border-4 border-amber-300 p-5 shadow-md sticky top-20 space-y-4">
+            <div id="checklist-card" class="bg-emerald-50/90 border-2 border-emerald-300 rounded-2xl p-3.5">
+              <div class="flex items-center justify-between mb-2">
+                <span id="checklist-title" class="text-xs font-extrabold uppercase text-emerald-800">Catatan Belanja dari Ibu:</span>
+                <span id="checklist-status" class="text-[11px] font-extrabold bg-white text-emerald-800 px-2 py-0.5 rounded-lg border border-emerald-200">0 / 3 Sesuai</span>
+              </div>
+              <ul id="mission-checklist-items" class="space-y-1.5 text-xs sm:text-sm font-bold text-gray-800"></ul>
+            </div>
+
+            <div class="border-b-2 border-dashed border-gray-300 pb-2.5 flex items-center justify-between">
+              <div>
+                <h3 id="receipt-title" class="font-display text-lg sm:text-xl font-bold text-amber-950">Keranjang Belanja</h3>
+                <p class="text-xs text-gray-500 font-bold">Pasar Tradisional Nusantara</p>
+              </div>
+              <button onclick="resetCurrentMission()" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold border border-gray-300 cursor-pointer">
+                Ulang Misi
+              </button>
+            </div>
+
+            <div id="cart-items-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div class="text-center py-6 text-gray-400 text-sm font-semibold">
+                Keranjang masih kosong.<br/>Silakan pilih barang sesuai catatan Ibu!
+              </div>
+            </div>
+
+            <div class="border-t-2 border-dashed border-gray-300 pt-3 space-y-2">
+              <div class="flex justify-between items-center text-sm font-bold text-gray-600">
+                <span>Subtotal Barang:</span>
+                <span id="cart-subtotal">Rp0</span>
+              </div>
+              <div id="cart-discount-row" class="hidden flex justify-between items-center text-sm font-bold text-rose-600">
+                <span>Potongan Tawar:</span>
+                <span id="cart-discount-val">- Rp0</span>
+              </div>
+              <div class="flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-200">
+                <span class="font-extrabold text-amber-950">Total Tagihan:</span>
+                <span id="cart-final-total" class="font-display text-2xl font-bold text-emerald-700">Rp0</span>
+              </div>
+            </div>
+
+            <div id="cart-proceed-box">
+              <button id="btn-proceed-bargain" onclick="proceedToBargain()" disabled
+                class="btn-3d w-full py-3.5 px-4 rounded-2xl bg-amber-500 disabled:bg-gray-300 disabled:border-gray-400 disabled:cursor-not-allowed hover:bg-amber-600 text-white font-bold text-sm sm:text-base border-b-4 border-amber-700 transition cursor-pointer">
+                Lengkapi Catatan Belanja Ibu Dahulu
+              </button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         HALAMAN 4: KUIS EVALUASI 10 SOAL & SERTIFIKAT (Revisi #3 & #4)
+         ========================================================= -->
+    <section id="view-kuis" class="hidden animate-pop max-w-3xl mx-auto">
+      <!-- Kontainer Soal Kuis -->
+      <div id="quiz-card" class="bg-white rounded-3xl border-4 border-sky-400 p-5 sm:p-8 shadow-lg space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-sky-100 pb-4">
+          <div>
+            <span class="bg-sky-100 text-sky-800 text-xs font-extrabold px-3 py-1 rounded-full uppercase">Evaluasi Pembelajaran</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-sky-950 mt-1">Kuis Bilangan Cacah & Etnomatematika</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="quiz-progress-badge" class="bg-amber-100 text-amber-900 border border-amber-300 px-3.5 py-1.5 rounded-xl text-sm font-extrabold">
+              Soal 1 / 10
+            </span>
+            <span id="quiz-score-badge" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3.5 py-1.5 rounded-xl text-sm font-extrabold">
+              Skor: 0
+            </span>
+          </div>
+        </div>
+
+        <!-- Bar Progress -->
+        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+          <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-300" style="width: 10%"></div>
+        </div>
+
+        <!-- Indikator Materi Soal -->
+        <div id="quiz-indicator-tag" class="inline-block bg-indigo-50 text-indigo-800 border border-indigo-200 px-3 py-1 rounded-lg text-xs font-extrabold">
+          Indikator: Membaca & Menulis Bilangan Cacah
+        </div>
+
+        <!-- Teks Pertanyaan -->
+        <div id="quiz-question-text" class="text-base sm:text-xl font-bold text-gray-900 leading-relaxed bg-amber-50/70 p-4 sm:p-5 rounded-2xl border-2 border-amber-200">
+          Memuat soal...
+        </div>
+
+        <!-- Pilihan Jawaban A, B, C, D -->
+        <div id="quiz-options-container" class="grid grid-cols-1 gap-3">
+          <!-- Diisi via JS -->
+        </div>
+
+        <!-- Kotak Umpan Balik & Pembahasan Bertahan (Revisi #4: Tidak hilang otomatis, menunggu tombol Lanjut) -->
+        <div id="quiz-explanation-box" class="hidden rounded-2xl p-4 sm:p-5 border-2 space-y-3 animate-pop">
+          <div id="quiz-feedback-title" class="text-lg font-display font-bold"></div>
+          <p id="quiz-explanation-text" class="text-sm sm:text-base leading-relaxed font-semibold"></p>
+          <div class="pt-2 flex justify-end">
+            <button id="btn-quiz-next" onclick="nextQuizQuestion()" class="btn-3d px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-base border-b-4 border-sky-800 shadow cursor-pointer">
+              Lanjut ke Soal Berikutnya &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layar Hasil & Sertifikat Kelulusan -->
+      <div id="quiz-result-card" class="hidden space-y-6 animate-pop">
+        <div id="certificate-area" class="bg-white rounded-3xl border-8 border-double border-amber-500 p-6 sm:p-10 shadow-2xl text-center relative overflow-hidden">
+          <!-- Ornamen Sudut -->
+          <div class="inline-block bg-amber-100 text-amber-900 px-4 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest mb-2 border border-amber-300">
+            Sertifikat Penghargaan Belajar
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-display font-bold text-amber-900">SERTIFIKAT KASIR CILIK</h2>
+          <p class="text-sm sm:text-base text-gray-600 font-bold mt-1">SIMBA PASAR — Etnomatematika Bilangan Cacah sampai 100.000</p>
+
+          <div class="my-6 py-5 px-4 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 rounded-2xl border-2 border-amber-200">
+            <p class="text-xs sm:text-sm font-bold text-gray-500 uppercase">Diberikan kepada:</p>
+            <div id="cert-student-name" class="text-2xl sm:text-4xl font-display font-bold text-emerald-800 my-1">Nama Siswa</div>
+            <div id="cert-student-class" class="text-sm sm:text-base font-extrabold text-amber-800">Kelas 5 SD</div>
+          </div>
+
+          <p class="text-sm sm:text-base text-gray-700 max-w-xl mx-auto leading-relaxed">
+            Telah menyelesaikan evaluasi pembelajaran Matematika materi <strong>Bilangan Cacah sampai dengan 100.000</strong> berbasis Etnomatematika Pasar Tradisional dengan hasil:
+          </p>
+
+          <div class="mt-4 inline-flex items-center gap-4 bg-emerald-50 border-2 border-emerald-300 px-6 py-3 rounded-2xl">
+            <div class="text-left">
+              <div class="text-xs font-extrabold text-emerald-700 uppercase">Nilai Akhir</div>
+              <div id="cert-final-score" class="text-3xl sm:text-4xl font-display font-bold text-emerald-900">100</div>
+            </div>
+            <div class="h-10 w-0.5 bg-emerald-200"></div>
+            <div class="text-left">
+              <div class="text-xs font-extrabold text-emerald-700 uppercase">Predikat</div>
+              <div id="cert-predicate" class="text-base sm:text-lg font-extrabold text-amber-800">Sangat Baik (Bintang Kasir)</div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap justify-between items-center text-xs text-gray-500 font-bold gap-2">
+            <span>Media Digital SIMBA PASAR • Kelas 5 SD</span>
+            <span id="cert-date">Tanggal: -</span>
+          </div>
+        </div>
+
+        <!-- Tombol Aksi Sertifikat -->
+        <div class="no-print flex flex-wrap justify-center gap-3">
+          <button onclick="window.print()" class="btn-3d px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold border-b-4 border-amber-700 shadow cursor-pointer">
+            Cetak / Simpan PDF Sertifikat
+          </button>
+          <button onclick="restartQuiz()" class="btn-3d px-6 py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold border-b-4 border-sky-800 shadow cursor-pointer">
+            Ulangi Kuis
+          </button>
+          <button onclick="navigateTo('kasir')" class="btn-3d px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-b-4 border-emerald-800 shadow cursor-pointer">
+            Kembali ke Kasir Pasar
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="no-print mt-auto py-4 text-center text-xs sm:text-sm text-amber-900/75 font-bold border-t border-amber-200/60 bg-white/60">
+    SIMBA PASAR &copy; 2026 — Media Pembelajaran Digital Etnomatematika Kelas 5 SD (Bilangan Cacah s.d. 100.000)
+  </footer>
+
+  <!-- =========================================================
+       SCRIPT LOGIKA APLIKASI LENGKAP
+       ========================================================= -->
+  <script>
+    // ---------------------------------------------------------
+    // 1. STATE GLOBAL APLIKASI
+    // ---------------------------------------------------------
+    const appState = {
+      studentName: 'Siswa Hebat',
+      studentClass: '5 SD',
+      currentView: 'welcome',
+      materiTab: 'etno',
+      writePracticeIdx: 0,
+      soundMuted: false,
+      // State Simulasi Pasar (POV dipilih tepat sebelum simulasi dimulai)
+      simRole: 'buyer',
+      povSelectedInSim: false,
+      buyerMissionIdx: 0,
+      sellerMissionIdx: 0,
+      kasirStage: 1,
+      cart: [],
+      bargainDiscount: 0,
+      agreedTotal: 0,
+      buyerPaymentBills: [],
+      buyerTotalPaid: 0,
+      assembledChange: [],
+      // State Kuis
+      quizIdx: 0,
+      quizScore: 0,
+      quizAnswered: false
+    };
+
+    // ---------------------------------------------------------
+    // 2. DATA BARANG PASAR BERSATUAN & ILUSTRASI SVG (LEBIH BANYAK & BERVARIASI)
+    // ---------------------------------------------------------
+    const MARKET_ITEMS = [
+      {
+        id: 'beras',
+        name: 'Beras Pandan Wangi',
+        unit: 'per 5 literan',
+        price: 64500,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <path d="M16 14 C16 8, 48 8, 48 14 L52 46 C52 50, 12 50, 12 46 Z" fill="#FEF9C3" stroke="#A16207" stroke-width="2.5"/>
+          <path d="M18 18 Q32 23 46 18" stroke="#CA8A04" stroke-width="2" fill="none"/>
+          <circle cx="25" cy="33" r="2.5" fill="#FDE047"/>
+          <circle cx="33" cy="37" r="2.5" fill="#FDE047"/>
+          <circle cx="40" cy="31" r="2.5" fill="#FDE047"/>
+          <text x="32" y="45" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#854D0E">5 LITER</text>
+        </svg>`
+      },
+      {
+        id: 'daging',
+        name: 'Daging Sapi Segar',
+        unit: 'per kg',
+        price: 48500,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <path d="M14 28 C12 15, 28 10, 44 15 C54 19, 54 36, 42 42 C28 48, 16 40, 14 28 Z" fill="#E11D48" stroke="#881337" stroke-width="2.5"/>
+          <ellipse cx="36" cy="28" rx="8" ry="6" fill="#FDA4AF" stroke="#9F1239" stroke-width="1.5"/>
+          <circle cx="36" cy="28" r="2.5" fill="#FFF1F2"/>
+        </svg>`
+      },
+      {
+        id: 'batik',
+        name: 'Kain Sarung Batik',
+        unit: 'per helai (1 kodi = 20)',
+        price: 42750,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <rect x="12" y="10" width="40" height="36" rx="5" fill="#78350F" stroke="#451A03" stroke-width="2.5"/>
+          <rect x="17" y="15" width="30" height="26" rx="2" fill="#F59E0B"/>
+          <circle cx="32" cy="28" r="7" fill="#92400E" stroke="#FEF3C7" stroke-width="1.5"/>
+          <circle cx="32" cy="28" r="2.5" fill="#FDE68A"/>
+        </svg>`
+      },
+      {
+        id: 'ayam',
+        name: 'Ayam Kampung Potong',
+        unit: 'per ekor',
+        price: 34200,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <ellipse cx="33" cy="32" rx="17" ry="13" fill="#FDE68A" stroke="#B45309" stroke-width="2.5"/>
+          <circle cx="20" cy="22" r="7" fill="#FDE68A" stroke="#B45309" stroke-width="2"/>
+          <path d="M18 15 L20 11 L22 15" fill="#EF4444"/>
+          <polygon points="13,22 9,24 13,26" fill="#F97316"/>
+          <circle cx="19" cy="21" r="1.5" fill="#1F2937"/>
+        </svg>`
+      },
+      {
+        id: 'ikan',
+        name: 'Ikan Nila Segar',
+        unit: 'per kg',
+        price: 28500,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <path d="M12 28 C20 15, 38 15, 48 28 C38 41, 20 41, 12 28 Z" fill="#38BDF8" stroke="#0369A1" stroke-width="2.5"/>
+          <polygon points="48,28 58,19 58,37" fill="#0284C7" stroke="#0369A1" stroke-width="2"/>
+          <circle cx="20" cy="26" r="2" fill="#0F172A"/>
+          <path d="M30 22 Q33 28 30 34" stroke="#0369A1" stroke-width="1.5" fill="none"/>
+        </svg>`
+      },
+      {
+        id: 'telur',
+        name: 'Telur Ayam Negeri',
+        unit: 'per kg',
+        price: 27400,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <rect x="10" y="34" width="44" height="12" rx="4" fill="#D97706" stroke="#78350F" stroke-width="2"/>
+          <ellipse cx="22" cy="29" rx="8" ry="10" fill="#FDE68A" stroke="#92400E" stroke-width="2"/>
+          <ellipse cx="34" cy="29" rx="8" ry="10" fill="#FEF3C7" stroke="#92400E" stroke-width="2"/>
+          <ellipse cx="45" cy="30" rx="7" ry="9" fill="#FDE68A" stroke="#92400E" stroke-width="2"/>
+        </svg>`
+      },
+      {
+        id: 'udang',
+        name: 'Udang Galah Kupas',
+        unit: 'per bungkus',
+        price: 23800,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <path d="M16 34 C14 20, 32 14, 46 24" stroke="#FB7185" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <path d="M46 24 L54 18 M46 24 L55 27" stroke="#E11D48" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="42" cy="21" r="1.8" fill="#1F2937"/>
+        </svg>`
+      },
+      {
+        id: 'cabai',
+        name: 'Cabai Merah Keriting',
+        unit: 'per kg',
+        price: 18600,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <path d="M18 16 Q26 34 16 44" stroke="#DC2626" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M32 14 Q36 34 30 46" stroke="#EF4444" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M46 16 Q40 34 48 44" stroke="#B91C1C" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M15 15 L21 15 M29 13 L35 13 M43 15 L49 15" stroke="#16A34A" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'pisang',
+        name: 'Pisang Kepok Kuning',
+        unit: 'per sisir (1 lusin = 12)',
+        price: 15500,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <path d="M18 14 L46 14" stroke="#78350F" stroke-width="4" stroke-linecap="round"/>
+          <path d="M22 15 Q16 34 26 44" stroke="#FACC15" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <path d="M32 15 Q30 36 38 45" stroke="#EAB308" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <path d="M42 15 Q44 35 50 43" stroke="#FDE047" stroke-width="6" stroke-linecap="round" fill="none"/>
+        </svg>`
+      },
+      {
+        id: 'gula',
+        name: 'Gula Aren Batok',
+        unit: 'per bungkus',
+        price: 12250,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <ellipse cx="32" cy="34" rx="18" ry="12" fill="#92400E" stroke="#451A03" stroke-width="2.5"/>
+          <ellipse cx="32" cy="26" rx="14" ry="8" fill="#B45309" stroke="#78350F" stroke-width="2"/>
+          <path d="M22 26 Q32 30 42 26" stroke="#FDE68A" stroke-width="1.5" fill="none"/>
+        </svg>`
+      },
+      {
+        id: 'tahu',
+        name: 'Tahu Putih Sumedang',
+        unit: 'per bungkus',
+        price: 6300,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <polygon points="16,24 32,16 48,24 32,32" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
+          <polygon points="16,24 32,32 32,46 16,38" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+          <polygon points="32,32 48,24 48,38 32,46" fill="#FDE68A" stroke="#B45309" stroke-width="2"/>
+        </svg>`
+      },
+      {
+        id: 'sayur',
+        name: 'Sayur Bayam Segar',
+        unit: 'per ikat',
+        price: 3500,
+        svg: `<svg class="w-14 h-12 mx-auto" viewBox="0 0 64 56" fill="none">
+          <ellipse cx="23" cy="22" rx="8" ry="11" transform="rotate(-18 23 22)" fill="#22C55E" stroke="#15803D" stroke-width="2"/>
+          <ellipse cx="33" cy="19" rx="8" ry="12" fill="#16A34A" stroke="#14532D" stroke-width="2"/>
+          <ellipse cx="42" cy="23" rx="8" ry="10" transform="rotate(18 42 23)" fill="#4ADE80" stroke="#15803D" stroke-width="2"/>
+          <rect x="25" y="31" width="14" height="6" rx="3" fill="#EA580C"/>
+          <path d="M28 37 L27 47 M32 37 L32 48 M36 37 L37 47" stroke="#84CC16" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`
+      }
+    ];
+
+    // Pecahan Uang Rupiah sesuai warna & nominal asli Indonesia
+    const RUPIAH_DENOMINATIONS = [
+      { value: 50000, label: 'Rp50.000', colorBg: '#DBEAFE', colorBorder: '#1D4ED8', text: '#1E3A8A', isCoin: false },
+      { value: 20000, label: 'Rp20.000', colorBg: '#DCFCE7', colorBorder: '#15803D', text: '#14532D', isCoin: false },
+      { value: 10000, label: 'Rp10.000', colorBg: '#F3E8FF', colorBorder: '#7E22CE', text: '#581C87', isCoin: false },
+      { value: 5000,  label: 'Rp5.000',  colorBg: '#FEF3C7', colorBorder: '#B45309', text: '#78350F', isCoin: false },
+      { value: 2000,  label: 'Rp2.000',  colorBg: '#E5E7EB', colorBorder: '#4B5563', text: '#1F2937', isCoin: false },
+      { value: 1000,  label: 'Rp1.000',  colorBg: '#FEF9C3', colorBorder: '#CA8A04', text: '#713F12', isCoin: false },
+      { value: 500,   label: 'Rp500',    colorBg: '#FEF08A', colorBorder: '#D97706', text: '#78350F', isCoin: true },
+      { value: 200,   label: 'Rp200',    colorBg: '#FDE68A', colorBorder: '#B45309', text: '#78350F', isCoin: true },
+      { value: 100,   label: 'Rp100',    colorBg: '#FEF08A', colorBorder: '#92400E', text: '#78350F', isCoin: true },
+      { value: 50,    label: 'Rp50',     colorBg: '#FDE68A', colorBorder: '#78350F', text: '#78350F', isCoin: true }
+    ];
+
+    function renderRupiahSVG(value, compact = false) {
+      const denom = RUPIAH_DENOMINATIONS.find(d => d.value === value) || RUPIAH_DENOMINATIONS[4];
+      const w = compact ? 74 : 88;
+      const h = compact ? 38 : 44;
+
+      if (denom.isCoin) {
+        const size = compact ? 38 : 44;
+        return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" class="shrink-0 drop-shadow-sm">
+          <circle cx="24" cy="24" r="21" fill="${denom.colorBg}" stroke="${denom.colorBorder}" stroke-width="3"/>
+          <circle cx="24" cy="24" r="16" fill="none" stroke="${denom.colorBorder}" stroke-width="1.2" stroke-dasharray="3 2"/>
+          <text x="24" y="27" text-anchor="middle" font-size="9.5" font-weight="900" fill="${denom.text}">${denom.label}</text>
+        </svg>`;
+      }
+
+      return `<svg width="${w}" height="${h}" viewBox="0 0 96 48" class="shrink-0 drop-shadow-sm">
+        <rect x="2" y="2" width="92" height="44" rx="6" fill="${denom.colorBg}" stroke="${denom.colorBorder}" stroke-width="3"/>
+        <rect x="8" y="8" width="80" height="32" rx="3" fill="none" stroke="${denom.colorBorder}" stroke-width="1" stroke-dasharray="4 2"/>
+        <circle cx="22" cy="24" r="8" fill="${denom.colorBorder}" opacity="0.18"/>
+        <text x="56" y="28" text-anchor="middle" font-size="13" font-weight="900" fill="${denom.text}">${denom.label}</text>
+      </svg>`;
+    }
+
+    // ---------------------------------------------------------
+    // 3. DATA KUIS 10 SOAL SESUAI KISI-KISI KELAS 5 SD
+    // ---------------------------------------------------------
+    const QUIZ_QUESTIONS = [
+      {
+        indicator: 'Membaca Bilangan Cacah (s.d. 100.000)',
+        question: 'Harga 5 liter beras pandan wangi di pasar adalah Rp64.500. Cara membaca bilangan 64.500 yang benar adalah ....',
+        options: [
+          'Enam puluh empat ribu lima ratus rupiah',
+          'Enam ratus empat puluh lima ribu rupiah',
+          'Enam puluh empat ribu lima puluh rupiah',
+          'Enam ribu empat ratus lima puluh rupiah'
+        ],
+        correct: 0,
+        explanation: 'Angka 64 berada di kelompok ribuan (enam puluh empat ribu) dan 500 berada di kelompok ratusan/satuan (lima ratus). Jadi dibaca "Enam puluh empat ribu lima ratus rupiah".'
+      },
+      {
+        indicator: 'Menulis Lambang Bilangan dari Nama Bilangan',
+        question: 'Lambang bilangan dari "Delapan puluh sembilan ribu tiga ratus tujuh puluh lima" adalah ....',
+        options: [
+          '89.735',
+          '89.375',
+          '80.935',
+          '98.375'
+        ],
+        correct: 1,
+        explanation: 'Delapan puluh sembilan ribu = 89.000, tiga ratus = 300, tujuh puluh lima = 75. Jika digabungkan menjadi 89.375.'
+      },
+      {
+        indicator: 'Nilai Tempat Bilangan Cacah',
+        question: 'Pada bilangan 75.842, angka 5 menempati nilai tempat ....',
+        options: [
+          'Puluh ribuan',
+          'Ribuan',
+          'Ratusan',
+          'Puluhan'
+        ],
+        correct: 1,
+        explanation: 'Susunan nilai tempat 75.842: 7 (puluh ribuan = 70.000), 5 (ribuan = 5.000), 8 (ratusan = 800), 4 (puluhan = 40), 2 (satuan = 2).'
+      },
+      {
+        indicator: 'Dekomposisi / Nilai Angka',
+        question: 'Bentuk penguraian nilai angka yang tepat untuk harga ikan nila Rp28.500 adalah ....',
+        options: [
+          '20.000 + 8.000 + 500 + 0 + 0',
+          '20.000 + 5.000 + 3.000 + 500',
+          '2.000 + 800 + 50 + 0',
+          '28.000 + 50 + 0'
+        ],
+        correct: 0,
+        explanation: 'Bilangan 28.500 terdiri atas 2 puluh ribuan (20.000), 8 ribuan (8.000), 5 ratusan (500), 0 puluhan (0), dan 0 satuan (0), sehingga tepat ditulis 20.000 + 8.000 + 500 + 0 + 0.'
+      },
+      {
+        indicator: 'Membandingkan Bilangan Cacah',
+        question: 'Tanda perbandingan yang tepat untuk membandingkan harga daging sapi Rp48.500 dan kain sarung Rp42.750 adalah ....',
+        options: [
+          '48.500 < 42.750',
+          '48.500 > 42.750',
+          '48.500 = 42.750',
+          '48.500 ≤ 42.750'
+        ],
+        correct: 1,
+        explanation: 'Angka puluh ribuan sama-sama 4 (40.000). Pada nilai ribuan, 8 lebih besar dari 2 (8.000 > 2.000), maka 48.500 > 42.750.'
+      },
+      {
+        indicator: 'Mengurutkan Bilangan Cacah',
+        question: 'Urutan harga barang dari yang TERKECIL ke TERBESAR adalah: Rp34.200; Rp15.500; Rp64.500; Rp27.400.',
+        options: [
+          'Rp15.500 — Rp27.400 — Rp34.200 — Rp64.500',
+          'Rp64.500 — Rp34.200 — Rp27.400 — Rp15.500',
+          'Rp15.500 — Rp34.200 — Rp27.400 — Rp64.500',
+          'Rp27.400 — Rp15.500 — Rp34.200 — Rp64.500'
+        ],
+        correct: 0,
+        explanation: 'Urutan dari nilai paling kecil ke paling besar: 15.500 (15 ribuan), lalu 27.400 (27 ribuan), lalu 34.200 (34 ribuan), dan terbesar 64.500 (64 ribuan).'
+      },
+      {
+        indicator: 'Etnomatematika: Satuan Tradisional (Lusin & Kodi)',
+        question: 'Di pasar tradisional, 1 lusin sama dengan 12 buah dan 1 kodi sama dengan 20 helai. Jika Siti membeli 1 lusin gelas dan 1 kodi serbet, jumlah seluruh barang yang dibeli Siti adalah ....',
+        options: [
+          '22 buah',
+          '32 buah',
+          '40 buah',
+          '24 buah'
+        ],
+        correct: 1,
+        explanation: '1 lusin = 12 buah, dan 1 kodi = 20 helai. Jadi 12 + 20 = 32 buah.'
+      },
+      {
+        indicator: 'Etnomatematika: Tawar-Menawar & Penjumlahan',
+        question: 'Budi membeli 1 ekor ayam seharga Rp34.200 dan 2 ikat bayam @ Rp3.500. Setelah menawar, penjual memberi potongan Rp2.200. Berapa total yang harus dibayar Budi?',
+        options: [
+          'Rp39.000',
+          'Rp41.200',
+          'Rp37.500',
+          'Rp43.400'
+        ],
+        correct: 0,
+        explanation: 'Harga 2 ikat bayam = 2 × Rp3.500 = Rp7.000. Total awal = Rp34.200 + Rp7.000 = Rp41.200. Setelah potongan tawar Rp2.200 menjadi Rp41.200 − Rp2.200 = Rp39.000.'
+      },
+      {
+        indicator: 'Menghitung Uang Kembalian Bervariasi',
+        question: 'Total belanja Rina adalah Rp46.350. Rina membayar menggunakan uang Rp50.000 (kembalian Rp3.650). Pecahan yang tepat untuk kembalian Rp3.650 adalah ....',
+        options: [
+          'Rp2.000 + Rp1.000 + Rp500 + Rp100 + Rp50',
+          'Rp5.000 + Rp1.000 + Rp500',
+          'Rp2.000 + Rp2.000 + Rp500',
+          'Rp3.000 + Rp500 + Rp150'
+        ],
+        correct: 0,
+        explanation: '2.000 + 1.000 + 500 + 100 + 50 = 3.650. Semua pecahan tersebut merupakan pecahan uang Rupiah yang sah.'
+      },
+      {
+        indicator: 'Pemecahan Masalah Batas Bilangan s.d. 100.000',
+        question: 'Ibu memberikan uang Rp95.000 kepada Dani untuk belanja di pasar. Dani membeli beras seharga Rp64.500 dan telur seharga Rp27.400. Berapa total belanja Dani?',
+        options: [
+          'Rp91.900',
+          'Rp92.900',
+          'Rp81.900',
+          'Rp99.900'
+        ],
+        correct: 0,
+        explanation: 'Total belanja = Rp64.500 + Rp27.400 = Rp91.900 (masih di bawah batas Rp99.999).'
+      }
+    ];
+
+    // ---------------------------------------------------------
+    // 4. UTILITAS FORMAT RUPIAH, TOAST & AUDIO (SUARA NYATA + CHIME)
+    // ---------------------------------------------------------
+    function formatRupiah(num) {
+      const safe = Math.max(0, Math.round(Number(num) || 0));
+      return 'Rp' + safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function parseRupiahInput(str) {
+      if (!str) return NaN;
+      const cleaned = String(str).replace(/[^0-9]/g, '');
+      if (cleaned === '') return NaN;
+      return parseInt(cleaned, 10);
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        success: 'bg-emerald-600 border-emerald-800 text-white',
+        warning: 'bg-amber-500 border-amber-700 text-white',
+        error: 'bg-rose-600 border-rose-800 text-white',
+        info: 'bg-sky-600 border-sky-800 text-white'
+      };
+      const toast = document.createElement('div');
+      toast.className = `animate-pop pointer-events-auto px-4 py-3 rounded-2xl border-b-4 shadow-lg text-xs sm:text-sm font-bold ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3200);
+    }
+
+    let sharedAudioCtx = null;
+    function ensureAudioContext() {
+      if (appState.soundMuted) return null;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new AudioCtx();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+        return sharedAudioCtx;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function playClickTone(freq = 540, duration = 0.09) {
+      if (appState.soundMuted) return;
+      try {
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        // Abaikan jika gagal
+      }
+    }
+
+    // Mengucapkan teks bahasa Indonesia menggunakan Web Speech API jika tersedia
+    function speakIndonesian(text) {
+      if (appState.soundMuted) return;
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'id-ID';
+          utter.rate = 0.95;
+          utter.pitch = 1.05;
+          const voices = window.speechSynthesis.getVoices();
+          const idVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
+          if (idVoice) utter.voice = idVoice;
+          window.speechSynthesis.speak(utter);
+        }
+      } catch (e) {
+        // Fallback chime sudah jalan
+      }
+    }
+
+    function toggleSoundMuted() {
+      appState.soundMuted = !appState.soundMuted;
+      const icon = document.getElementById('sound-icon');
+      const label = document.getElementById('sound-label');
+      if (appState.soundMuted) {
+        icon.innerHTML = '&#128263;';
+        label.textContent = 'Suara Mati';
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        showToast('Suara dimatikan.', 'info');
+      } else {
+        icon.innerHTML = '&#128266;';
+        label.textContent = 'Suara Aktif';
+        playClickTone(660, 0.12);
+        speakIndonesian('Suara aktif');
+      }
+    }
+
+    // ---------------------------------------------------------
+    // 5. LOGIKA HALAMAN MATERI (TAB, CONTOH BACA, LATIHAN TULIS, NILAI TEMPAT)
+    // ---------------------------------------------------------
+    const READING_EXAMPLES = [
+      { num: 4750, text: 'Empat ribu tujuh ratus lima puluh', syllables: 'Em-pat ri-bu tu-juh ra-tus li-ma pu-luh' },
+      { num: 18250, text: 'Delapan belas ribu dua ratus lima puluh', syllables: 'De-la-pan be-las ri-bu du-a ra-tus li-ma pu-luh' },
+      { num: 47850, text: 'Empat puluh tujuh ribu delapan ratus lima puluh', syllables: 'Em-pat pu-luh tu-juh ri-bu de-la-pan ra-tus li-ma pu-luh' },
+      { num: 64500, text: 'Enam puluh empat ribu lima ratus', syllables: 'E-nam pu-luh em-pat ri-bu li-ma ra-tus' },
+      { num: 95204, text: 'Sembilan puluh lima ribu dua ratus empat', syllables: 'Sem-bi-lan pu-luh li-ma ri-bu du-a ra-tus em-pat' },
+      { num: 100000, text: 'Seratus ribu', syllables: 'Se-ra-tus ri-bu' }
+    ];
+
+    const WRITE_PRACTICE_ITEMS = [
+      { words: 'Tujuh puluh empat ribu lima ratus dua puluh', answer: 74520 },
+      { words: 'Tiga puluh dua ribu delapan ratus', answer: 32800 },
+      { words: 'Lima puluh enam ribu sembilan puluh lima', answer: 56095 },
+      { words: 'Sembilan puluh satu ribu empat ratus sepuluh', answer: 91410 },
+      { words: 'Dua puluh lima ribu tujuh ratus lima puluh', answer: 25750 }
+    ];
+
+    function switchMateriTab(tabName) {
+      appState.materiTab = tabName;
+      const tabs = ['etno', 'baca', 'tempat'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-materi-${t}`);
+        const panel = document.getElementById(`panel-materi-${t}`);
+        if (btn) {
+          btn.className = t === tabName
+            ? 'materi-tab py-3 px-4 rounded-xl font-extrabold text-sm sm:text-base transition bg-amber-500 text-white shadow cursor-pointer'
+            : 'materi-tab py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition bg-white text-amber-950 hover:bg-amber-100 cursor-pointer';
+        }
+        if (panel) {
+          panel.classList.toggle('hidden', t !== tabName);
+        }
+      });
+      playClickTone(550, 0.07);
+    }
+
+    function initMateriContent() {
+      const listEl = document.getElementById('reading-examples-list');
+      if (listEl) {
+        listEl.innerHTML = READING_EXAMPLES.map((ex, idx) => `
+          <div class="bg-white rounded-2xl p-4 border-2 border-sky-200 flex items-center justify-between gap-3">
+            <div>
+              <div class="font-display text-xl sm:text-2xl font-bold text-sky-950">${formatRupiah(ex.num)}</div>
+              <div class="text-sm font-extrabold text-gray-800 mt-0.5">"${ex.text}"</div>
+              <div class="text-xs text-sky-700 font-semibold mt-1">Ejaan: ${ex.syllables}</div>
+            </div>
+            <button onclick="playExampleChime(${idx})"
+              class="btn-3d px-3.5 py-2.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 font-extrabold text-xs border border-sky-300 shrink-0 cursor-pointer">
+              &#128266; Dengar Suara
+            </button>
+          </div>
+        `).join('');
+      }
+
+      renderWritePractice();
+      setPlaceExplorer(64500);
+    }
+
+    function playExampleChime(idx) {
+      const baseFreq = 440 + (idx * 55);
+      playClickTone(baseFreq, 0.14);
+      setTimeout(() => playClickTone(baseFreq * 1.25, 0.14), 130);
+      const ex = READING_EXAMPLES[idx];
+      speakIndonesian(`${ex.num} rupiah. Dibaca: ${ex.text} rupiah`);
+      showToast(`${formatRupiah(ex.num)} dibaca: "${ex.text}"`, 'info');
+    }
+
+    function renderWritePractice() {
+      const item = WRITE_PRACTICE_ITEMS[appState.writePracticeIdx];
+      document.getElementById('write-practice-progress').textContent = `Soal ${appState.writePracticeIdx + 1} / ${WRITE_PRACTICE_ITEMS.length}`;
+      document.getElementById('write-question-text').textContent = `"${item.words}"`;
+      document.getElementById('write-answer-input').value = '';
+      document.getElementById('write-practice-feedback').classList.add('hidden');
+    }
+
+    function checkWritePractice() {
+      const item = WRITE_PRACTICE_ITEMS[appState.writePracticeIdx];
+      const userVal = parseRupiahInput(document.getElementById('write-answer-input').value);
+      const fb = document.getElementById('write-practice-feedback');
+      fb.classList.remove('hidden');
+
+      if (userVal === item.answer) {
+        playClickTone(760, 0.15);
+        speakIndonesian(`Tepat sekali! ${item.answer} rupiah. Dibaca: ${item.words} rupiah`);
+        fb.className = 'p-3.5 rounded-xl text-sm sm:text-base font-bold bg-emerald-100 text-emerald-900 border border-emerald-300';
+        fb.textContent = `Hebat! Lambang bilangan yang tepat adalah ${item.answer.toLocaleString('id-ID')} (${formatRupiah(item.answer)}).`;
+      } else {
+        playClickTone(240, 0.18);
+        fb.className = 'p-3.5 rounded-xl text-sm sm:text-base font-bold bg-rose-100 text-rose-900 border border-rose-300';
+        fb.textContent = `Belum tepat. Perhatikan kata "${item.words}", lalu tulis angkanya dengan teliti.`;
+      }
+    }
+
+    function nextWritePractice() {
+      appState.writePracticeIdx = (appState.writePracticeIdx + 1) % WRITE_PRACTICE_ITEMS.length;
+      renderWritePractice();
+      playClickTone(580, 0.08);
+    }
+
+    function setPlaceExplorer(num) {
+      const padded = String(num).padStart(5, '0');
+      const weights = [10000, 1000, 100, 10, 1];
+      const parts = [];
+
+      for (let i = 0; i < 5; i++) {
+        const digit = parseInt(padded[i], 10);
+        const val = digit * weights[i];
+        document.getElementById(`pv-exp-${i}`).textContent = digit;
+        document.getElementById(`pv-val-${i}`).textContent = val.toLocaleString('id-ID');
+        parts.push(val.toLocaleString('id-ID'));
+      }
+
+      const foundEx = READING_EXAMPLES.find(r => r.num === num);
+      const readingText = foundEx ? ` (${foundEx.text})` : '';
+      document.getElementById('pv-exp-summary').textContent =
+        `${num.toLocaleString('id-ID')} = ${parts.join(' + ')}${readingText}`;
+    }
+
+    // ---------------------------------------------------------
+    // 8. NAVIGASI ANTAR HALAMAN
+    // ---------------------------------------------------------
+    function startApplication() {
+      const nameInput = document.getElementById('input-student-name').value.trim();
+      const classInput = document.getElementById('input-student-class').value.trim();
+      if (!nameInput) {
+        showToast('Silakan isi nama lengkapmu terlebih dahulu ya!', 'warning');
+        document.getElementById('input-student-name').focus();
+        return;
+      }
+      appState.studentName = nameInput;
+      appState.studentClass = classInput || '5 SD';
+      document.getElementById('header-student-info').textContent = `${appState.studentName} • Kelas ${appState.studentClass}`;
+      document.getElementById('app-header').classList.remove('hidden');
+      playClickTone(660, 0.12);
+      navigateTo('guide');
+    }
+
+    function navigateTo(viewName) {
+      appState.currentView = viewName;
+      const views = ['welcome', 'guide', 'materi', 'kasir', 'kuis'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.toggle('hidden', v !== viewName);
+      });
+
+      if (viewName === 'kasir') {
+        syncPovGateVisibility();
+      }
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isActive = btn.dataset.nav === viewName;
+        if (isActive) {
+          btn.className = 'nav-btn px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold border-2 border-amber-600 bg-amber-500 text-white shadow-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer';
+        } else {
+          btn.className = 'nav-btn px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-950 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer';
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function syncPovGateVisibility() {
+      document.getElementById('pov-gate-card').classList.toggle('hidden', appState.povSelectedInSim);
+      document.getElementById('simulation-active-area').classList.toggle('hidden', !appState.povSelectedInSim);
+    }
+
+    function enterSimulationWithRole(role) {
+      appState.simRole = role;
+      appState.povSelectedInSim = true;
+      syncPovGateVisibility();
+      loadMissionForCurrentRole();
+      playClickTone(640, 0.12);
+    }
+
+    function backToPovGate() {
+      appState.povSelectedInSim = false;
+      syncPovGateVisibility();
+      playClickTone(500, 0.08);
+    }
+
+    // ---------------------------------------------------------
+    // 10. LOGIKA SIMULASI PASAR DUA POV (LEBIH BANYAK MISI & HARGA BERVARIASI)
+    // ---------------------------------------------------------
+    const BUYER_MISSIONS = [
+      {
+        title: 'Misi Belanja Lauk & Buah Segar',
+        budget: 80000,
+        budgetBills: [50000, 20000, 10000],
+        discount: 2350,
+        items: [
+          { id: 'daging', qty: 1 }, // 48.500
+          { id: 'pisang', qty: 1 }, // 15.500
+          { id: 'sayur', qty: 2 }   // 7.000 -> Subtotal 71.000, tawar 2.350 = 68.650 -> Kembalian 11.350
+        ]
+      },
+      {
+        title: 'Misi Belanja Beras, Gula & Sayur',
+        budget: 90000,
+        budgetBills: [50000, 20000, 20000],
+        discount: 2750,
+        items: [
+          { id: 'beras', qty: 1 },  // 64.500
+          { id: 'gula', qty: 1 },   // 12.250
+          { id: 'tahu', qty: 1 }    // 6.300 -> Subtotal 83.050, tawar 2.750 = 80.300 -> Kembalian 9.700
+        ]
+      },
+      {
+        title: 'Misi Belanja Persiapan Masak Spesial',
+        budget: 95000,
+        budgetBills: [50000, 20000, 20000, 5000],
+        discount: 3100,
+        items: [
+          { id: 'ayam', qty: 1 },   // 34.200
+          { id: 'udang', qty: 1 },  // 23.800
+          { id: 'cabai', qty: 1 }   // 18.600 -> Subtotal 76.600, tawar 3.100 = 73.500 -> Kembalian 21.500
+        ]
+      },
+      {
+        title: 'Misi Belanja Kain & Buah untuk Nenek',
+        budget: 75000,
+        budgetBills: [50000, 20000, 5000],
+        discount: 1750,
+        items: [
+          { id: 'batik', qty: 1 },  // 42.750
+          { id: 'pisang', qty: 1 }, // 15.500
+          { id: 'sayur', qty: 2 }   // 7.000 -> Subtotal 65.250, tawar 1.750 = 63.500 -> Kembalian 11.500
+        ]
+      },
+      {
+        title: 'Misi Belanja Ikan, Telur & Tahu',
+        budget: 70000,
+        budgetBills: [50000, 20000],
+        discount: 2200,
+        items: [
+          { id: 'ikan', qty: 1 },   // 28.500
+          { id: 'telur', qty: 1 },  // 27.400
+          { id: 'tahu', qty: 1 }    // 6.300 -> Subtotal 62.200, tawar 2.200 = 60.000 -> Kembalian 10.000
+        ]
+      }
+    ];
+
+    const SELLER_ORDERS = [
+      {
+        customerName: 'Bu Sari',
+        discount: 2450,
+        paymentBills: [50000, 20000, 10000], // Rp80.000
+        items: [
+          { id: 'beras', qty: 1 },  // 64.500
+          { id: 'sayur', qty: 3 }   // 10.500 -> Subtotal 75.000, tawar 2.450 = 72.550 -> Kembalian 7.450
+        ]
+      },
+      {
+        customerName: 'Pak Hendra',
+        discount: 2100,
+        paymentBills: [50000, 20000, 5000], // Rp75.000
+        items: [
+          { id: 'ayam', qty: 1 },   // 34.200
+          { id: 'telur', qty: 1 },  // 27.400
+          { id: 'tahu', qty: 1 }    // 6.300 -> Subtotal 67.900, tawar 2.100 = 65.800 -> Kembalian 9.200
+        ]
+      },
+      {
+        customerName: 'Ibu Ratna',
+        discount: 3250,
+        paymentBills: [50000, 50000], // Rp100.000
+        items: [
+          { id: 'daging', qty: 1 }, // 48.500
+          { id: 'batik', qty: 1 }   // 42.750 -> Subtotal 91.250, tawar 3.250 = 88.000 -> Kembalian 12.000
+        ]
+      },
+      {
+        customerName: 'Kak Dimas',
+        discount: 1850,
+        paymentBills: [50000, 10000], // Rp60.000
+        items: [
+          { id: 'ikan', qty: 1 },   // 28.500
+          { id: 'cabai', qty: 1 }   // 18.600 -> Subtotal 47.100, tawar 1.850 = 45.250 -> Kembalian 14.750
+        ]
+      },
+      {
+        customerName: 'Bu Yanti',
+        discount: 2600,
+        paymentBills: [50000, 20000], // Rp70.000
+        items: [
+          { id: 'udang', qty: 1 },  // 23.800
+          { id: 'pisang', qty: 1 }, // 15.500
+          { id: 'gula', qty: 1 }    // 12.250 -> Subtotal 51.550, tawar 2.600 = 48.950 -> Kembalian 21.050
+        ]
+      }
+    ];
+
+    function initKasirUI() {
+      const grid = document.getElementById('market-catalog-grid');
+      grid.innerHTML = MARKET_ITEMS.map(item => `
+        <button onclick="addItemToCart('${item.id}')"
+          class="btn-3d bg-amber-50/70 hover:bg-amber-100 border-2 border-amber-200 hover:border-amber-500 rounded-2xl p-3 text-center flex flex-col justify-between transition cursor-pointer">
+          <div>
+            ${item.svg}
+            <div class="font-bold text-xs sm:text-sm text-gray-900 mt-1.5 leading-snug">${item.name}</div>
+            <div class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-0.5 inline-block mt-1">
+              ${item.unit}
+            </div>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-amber-200/80 font-display text-sm sm:text-base font-bold text-amber-900">
+            ${formatRupiah(item.price)}
+          </div>
+        </button>
+      `).join('');
+
+      const drawer = document.getElementById('rupiah-drawer-grid');
+      drawer.innerHTML = RUPIAH_DENOMINATIONS.map(d => `
+        <button onclick="addChangeDenomination(${d.value})"
+          class="btn-3d p-2 rounded-2xl bg-gray-50 hover:bg-emerald-50 border-2 border-gray-200 hover:border-emerald-400 flex flex-col items-center justify-center gap-1 transition cursor-pointer">
+          ${renderRupiahSVG(d.value, false)}
+          <span class="text-xs font-extrabold text-gray-800">+ ${d.label}</span>
+        </button>
+      `).join('');
+
+      loadMissionForCurrentRole();
+    }
+
+    function nextRoleMission() {
+      if (appState.simRole === 'buyer') {
+        appState.buyerMissionIdx = (appState.buyerMissionIdx + 1) % BUYER_MISSIONS.length;
+      } else {
+        appState.sellerMissionIdx = (appState.sellerMissionIdx + 1) % SELLER_ORDERS.length;
+      }
+      loadMissionForCurrentRole();
+      playClickTone(640, 0.1);
+    }
+
+    function resetCurrentMission() {
+      loadMissionForCurrentRole();
+      showToast('Misi telah diatur ulang dari awal.', 'info');
+    }
+
+    function formatItemListSentence(items) {
+      return items.map(entry => {
+        const info = MARKET_ITEMS.find(m => m.id === entry.id);
+        return `<strong>${entry.qty} ${info.unit.replace(/^per\s+/i, '')} ${info.name}</strong>`;
+      }).join(', ');
+    }
+
+    function loadMissionForCurrentRole() {
+      const banner = document.getElementById('mission-story-banner');
+      const avatarBox = document.getElementById('mission-avatar-box');
+
+      appState.assembledChange = [];
+
+      if (appState.simRole === 'buyer') {
+        document.getElementById('active-role-subtitle').className = 'text-xs font-extrabold uppercase text-emerald-700 tracking-wide';
+        document.getElementById('active-role-subtitle').textContent = 'POV Pembeli • Misi Belanja dari Ibu';
+
+        const mission = BUYER_MISSIONS[appState.buyerMissionIdx];
+        appState.kasirStage = 1;
+        appState.cart = [];
+        appState.bargainDiscount = 0;
+        appState.agreedTotal = 0;
+        appState.buyerPaymentBills = mission.budgetBills;
+        appState.buyerTotalPaid = mission.budget;
+
+        banner.className = 'rounded-2xl p-4 sm:p-5 border-2 bg-emerald-50/90 border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4';
+        avatarBox.innerHTML = `<svg class="w-14 h-14" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" fill="#D1FAE5" stroke="#059669" stroke-width="2.5"/>
+          <circle cx="32" cy="25" r="11" fill="#FDE68A"/>
+          <path d="M19 25 C19 11, 45 11, 45 25" fill="#92400E"/>
+          <circle cx="28" cy="24" r="1.8" fill="#1F2937"/>
+          <circle cx="36" cy="24" r="1.8" fill="#1F2937"/>
+          <path d="M28 29 Q32 33 36 29" stroke="#9A3412" stroke-width="2" stroke-linecap="round"/>
+          <path d="M14 54 C16 40, 48 40, 50 54" fill="#059669"/>
+        </svg>`;
+
+        document.getElementById('mission-badge-text').className = 'inline-block bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase';
+        document.getElementById('mission-badge-text').textContent = `POV Pembeli • Misi ${appState.buyerMissionIdx + 1} dari ${BUYER_MISSIONS.length}`;
+        document.getElementById('mission-headline').textContent = mission.title;
+        document.getElementById('mission-narrative').innerHTML =
+          `Ibu menyuruh <strong>${appState.studentName}</strong> pergi ke pasar tradisional membawa uang sebesar <strong>${formatRupiah(mission.budget)}</strong> untuk membeli: ${formatItemListSentence(mission.items)}.`;
+        document.getElementById('mission-budget-label').textContent = 'Uang Saku dari Ibu';
+        document.getElementById('mission-budget-amount').textContent = formatRupiah(mission.budget);
+
+        document.getElementById('checklist-title').textContent = `Catatan Belanja Ibu untuk ${appState.studentName}:`;
+        document.getElementById('receipt-title').textContent = `Keranjang Belanja ${appState.studentName}`;
+      } else {
+        document.getElementById('active-role-subtitle').className = 'text-xs font-extrabold uppercase text-amber-800 tracking-wide';
+        document.getElementById('active-role-subtitle').textContent = 'POV Penjual / Kasir • Melayani Pelanggan';
+
+        const order = SELLER_ORDERS[appState.sellerMissionIdx];
+        appState.cart = order.items.map(i => ({ id: i.id, qty: i.qty }));
+        const subtotal = getCartSubtotal();
+        appState.bargainDiscount = order.discount;
+        appState.agreedTotal = subtotal - order.discount;
+        appState.buyerPaymentBills = order.paymentBills;
+        appState.buyerTotalPaid = order.paymentBills.reduce((a, b) => a + b, 0);
+        appState.kasirStage = 2;
+
+        banner.className = 'rounded-2xl p-4 sm:p-5 border-2 bg-amber-50/90 border-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4';
+        avatarBox.innerHTML = `<svg class="w-14 h-14" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" fill="#FEF3C7" stroke="#D97706" stroke-width="2.5"/>
+          <circle cx="32" cy="25" r="11" fill="#FDBA74"/>
+          <path d="M18 24 C18 12, 46 12, 46 24" fill="#78350F"/>
+          <circle cx="28" cy="24" r="1.8" fill="#1F2937"/>
+          <circle cx="36" cy="24" r="1.8" fill="#1F2937"/>
+          <path d="M28 29 Q32 33 36 29" stroke="#9A3412" stroke-width="2" stroke-linecap="round"/>
+          <path d="M14 54 C16 40, 48 40, 50 54" fill="#B45309"/>
+        </svg>`;
+
+        document.getElementById('mission-badge-text').className = 'inline-block bg-amber-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase';
+        document.getElementById('mission-badge-text').textContent = `POV Penjual • Pelanggan ${appState.sellerMissionIdx + 1} dari ${SELLER_ORDERS.length}`;
+        document.getElementById('mission-headline').textContent = `Melayani Pesanan ${order.customerName}`;
+        document.getElementById('mission-narrative').innerHTML =
+          `<strong>${appState.studentName}</strong> bertugas sebagai kasir pasar. Pelanggan bernama <strong>${order.customerName}</strong> datang memesan: ${formatItemListSentence(order.items)}, lalu menawar harga belanjaannya.`;
+        document.getElementById('mission-budget-label').textContent = `Uang Bayar ${order.customerName}`;
+        document.getElementById('mission-budget-amount').textContent = formatRupiah(appState.buyerTotalPaid);
+
+        document.getElementById('checklist-title').textContent = `Daftar Pesanan ${order.customerName}:`;
+        document.getElementById('receipt-title').textContent = `Nota Kasir (${order.customerName})`;
+
+        setupBargainStageUI(subtotal, order.discount);
+      }
+
+      updateKasirStageUI();
+      renderMissionChecklist();
+      renderCart();
+    }
+
+    function renderMissionChecklist() {
+      const targetItems = appState.simRole === 'buyer'
+        ? BUYER_MISSIONS[appState.buyerMissionIdx].items
+        : SELLER_ORDERS[appState.sellerMissionIdx].items;
+
+      let fulfilledCount = 0;
+      const listHtml = targetItems.map(target => {
+        const info = MARKET_ITEMS.find(m => m.id === target.id);
+        const inCart = appState.cart.find(c => c.id === target.id);
+        const currentQty = inCart ? inCart.qty : 0;
+        const isDone = currentQty === target.qty;
+        if (isDone) fulfilledCount++;
+
+        return `
+          <li class="flex items-center justify-between gap-2 bg-white px-3 py-1.5 rounded-xl border ${isDone ? 'border-emerald-400 text-emerald-900' : 'border-gray-200 text-gray-700'}">
+            <span>${isDone ? '&#10003;' : '&#9675;'} ${target.qty} ${info.unit.replace(/^per\s+/i, '')} ${info.name}</span>
+            <span class="text-xs font-extrabold ${isDone ? 'text-emerald-600' : 'text-amber-700'}">${currentQty}/${target.qty}</span>
+          </li>
+        `;
+      }).join('');
+
+      document.getElementById('mission-checklist-items').innerHTML = listHtml;
+      document.getElementById('checklist-status').textContent = `${fulfilledCount} / ${targetItems.length} Sesuai`;
+    }
+
+    function isBuyerChecklistComplete() {
+      const targetItems = BUYER_MISSIONS[appState.buyerMissionIdx].items;
+      if (appState.cart.length !== targetItems.length) return false;
+      return targetItems.every(t => {
+        const found = appState.cart.find(c => c.id === t.id);
+        return found && found.qty === t.qty;
+      });
+    }
+
+    function getCartSubtotal() {
+      return appState.cart.reduce((sum, entry) => {
+        const item = MARKET_ITEMS.find(i => i.id === entry.id);
+        return sum + (item ? item.price * entry.qty : 0);
+      }, 0);
+    }
+
+    function addItemToCart(itemId) {
+      if (appState.simRole !== 'buyer' || appState.kasirStage !== 1) return;
+      const item = MARKET_ITEMS.find(i => i.id === itemId);
+      if (!item) return;
+
+      const mission = BUYER_MISSIONS[appState.buyerMissionIdx];
+      const targetSpec = mission.items.find(t => t.id === itemId);
+
+      if (!targetSpec) {
+        playClickTone(220, 0.18);
+        showToast(`"${item.name}" tidak ada di catatan belanja Ibu. Yuk periksa lagi daftar pesanan Ibu di sebelah kanan!`, 'warning');
+        return;
+      }
+
+      const existing = appState.cart.find(c => c.id === itemId);
+      const currentQty = existing ? existing.qty : 0;
+      if (currentQty >= targetSpec.qty) {
+        playClickTone(240, 0.15);
+        showToast(`Jumlah ${item.name} sudah cukup sesuai pesan Ibu (${targetSpec.qty} ${item.unit.replace(/^per\s+/i, '')})!`, 'info');
+        return;
+      }
+
+      const newSubtotal = getCartSubtotal() + item.price;
+      if (newSubtotal > 99999 || newSubtotal > mission.budget) {
+        playClickTone(220, 0.2);
+        showToast(`Total belanja tidak boleh melebihi uang saku Ibu (${formatRupiah(mission.budget)}) dan batas Rp99.999!`, 'error');
+        return;
+      }
+
+      playClickTone(540, 0.08);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        appState.cart.push({ id: itemId, qty: 1 });
+      }
+      renderMissionChecklist();
+      renderCart();
+    }
+
+    function removeItemFromCart(itemId) {
+      if (appState.simRole !== 'buyer' || appState.kasirStage !== 1) return;
+      const idx = appState.cart.findIndex(c => c.id === itemId);
+      if (idx === -1) return;
+      playClickTone(380, 0.08);
+      if (appState.cart[idx].qty > 1) {
+        appState.cart[idx].qty -= 1;
+      } else {
+        appState.cart.splice(idx, 1);
+      }
+      renderMissionChecklist();
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cart-items-list');
+      const subtotal = getCartSubtotal();
+
+      if (appState.cart.length === 0) {
+        list.innerHTML = `<div class="text-center py-6 text-gray-400 text-sm font-semibold">Keranjang masih kosong.<br/>Klik barang di etalase sesuai catatan Ibu!</div>`;
+      } else {
+        list.innerHTML = appState.cart.map(entry => {
+          const item = MARKET_ITEMS.find(i => i.id === entry.id);
+          const canRemove = appState.simRole === 'buyer' && appState.kasirStage === 1;
+          return `
+            <div class="flex items-center justify-between gap-2 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200">
+              <div class="min-w-0">
+                <div class="font-bold text-xs sm:text-sm text-gray-900 truncate">${item.name}</div>
+                <div class="text-[11px] text-gray-600 font-semibold">${entry.qty}x @ ${formatRupiah(item.price)} (${item.unit})</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="font-extrabold text-xs sm:text-sm text-amber-950">${formatRupiah(item.price * entry.qty)}</span>
+                ${canRemove ? `
+                  <button onclick="removeItemFromCart('${item.id}')" title="Kurangi 1"
+                    class="w-7 h-7 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 font-extrabold text-sm flex items-center justify-center cursor-pointer">
+                    &minus;
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('cart-subtotal').textContent = formatRupiah(subtotal);
+
+      if (appState.bargainDiscount > 0) {
+        document.getElementById('cart-discount-row').classList.remove('hidden');
+        document.getElementById('cart-discount-val').textContent = `- ${formatRupiah(appState.bargainDiscount)}`;
+        document.getElementById('cart-final-total').textContent = formatRupiah(appState.agreedTotal);
+      } else {
+        document.getElementById('cart-discount-row').classList.add('hidden');
+        document.getElementById('cart-final-total').textContent = formatRupiah(subtotal);
+      }
+
+      const btnProceed = document.getElementById('btn-proceed-bargain');
+      if (appState.simRole === 'buyer') {
+        if (isBuyerChecklistComplete()) {
+          btnProceed.disabled = false;
+          btnProceed.textContent = 'Semua Pesanan Lengkap! Lanjut Tawar Harga →';
+        } else {
+          btnProceed.disabled = true;
+          btnProceed.textContent = 'Lengkapi Catatan Belanja Ibu Dahulu';
+        }
+      }
+    }
+
+    function updateKasirStageUI() {
+      const stepsBar = document.getElementById('kasir-steps-bar');
+      if (appState.simRole === 'buyer') {
+        stepsBar.className = 'grid grid-cols-4 gap-2 text-center';
+        const labels = ['1. Pilih Barang Ibu', '2. Tawar ke Penjual', '3. Nilai Tempat', '4. Kembalian'];
+        for (let s = 1; s <= 4; s++) {
+          const pill = document.getElementById(`step-pill-${s}`);
+          const stageEl = document.getElementById(`kasir-stage-${s}`);
+          pill.classList.remove('hidden');
+          pill.textContent = labels[s - 1];
+          if (s === appState.kasirStage) {
+            pill.className = 'py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-emerald-600 bg-emerald-600 text-white shadow-sm';
+            stageEl.classList.remove('hidden');
+          } else if (s < appState.kasirStage) {
+            pill.className = 'py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-emerald-300 bg-emerald-100 text-emerald-900';
+            stageEl.classList.add('hidden');
+          } else {
+            pill.className = 'py-2 px-2 rounded-xl font-bold text-xs sm:text-sm border-2 border-gray-200 bg-white text-gray-400';
+            stageEl.classList.add('hidden');
+          }
+        }
+        document.getElementById('cart-proceed-box').classList.toggle('hidden', appState.kasirStage !== 1);
+      } else {
+        stepsBar.className = 'grid grid-cols-3 gap-2 text-center';
+        document.getElementById('step-pill-1').classList.add('hidden');
+        document.getElementById('kasir-stage-1').classList.add('hidden');
+        document.getElementById('cart-proceed-box').classList.add('hidden');
+
+        const sellerLabels = { 2: '1. Tanggap Tawaran', 3: '2. Mesin Kasir', 4: '3. Kembalian' };
+        [2, 3, 4].forEach(s => {
+          const pill = document.getElementById(`step-pill-${s}`);
+          const stageEl = document.getElementById(`kasir-stage-${s}`);
+          pill.classList.remove('hidden');
+          pill.textContent = sellerLabels[s];
+          if (s === appState.kasirStage) {
+            pill.className = 'py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-600 bg-amber-600 text-white shadow-sm';
+            stageEl.classList.remove('hidden');
+          } else if (s < appState.kasirStage) {
+            pill.className = 'py-2 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-300 bg-amber-100 text-amber-900';
+            stageEl.classList.add('hidden');
+          } else {
+            pill.className = 'py-2 px-2 rounded-xl font-bold text-xs sm:text-sm border-2 border-gray-200 bg-white text-gray-400';
+            stageEl.classList.add('hidden');
+          }
+        });
+      }
+    }
+
+    function setupBargainStageUI(subtotal, discount) {
+      document.getElementById('bargain-orig-price').textContent = formatRupiah(subtotal);
+      document.getElementById('bargain-discount').textContent = `- ${formatRupiah(discount)}`;
+      document.getElementById('bargain-input').value = '';
+      document.getElementById('bargain-feedback').classList.add('hidden');
+
+      if (appState.simRole === 'buyer') {
+        document.getElementById('bargain-role-badge').textContent = 'POV Pembeli • Menawar Sopan';
+        document.getElementById('bargain-title').textContent = `${appState.studentName} Menawar Harga ke Pedagang`;
+        document.getElementById('bargain-dialogue').innerHTML =
+          `<strong>${appState.studentName}:</strong> "Permisi Pak/Bu Pedagang, total belanjaan pesanan Ibu <strong>${formatRupiah(subtotal)}</strong>. Boleh kurang <strong>${formatRupiah(discount)}</strong> ya?"<br/><strong>Pedagang:</strong> "Boleh Nak, silakan hitung total harga barunya ya!"`;
+        document.getElementById('btn-verify-bargain').textContent = 'Hitung Harga Kesepakatan';
+      } else {
+        const customer = SELLER_ORDERS[appState.sellerMissionIdx].customerName;
+        document.getElementById('bargain-role-badge').textContent = 'POV Penjual • Melayani Tawaran';
+        document.getElementById('bargain-title').textContent = `${customer} Menawar Harga Belanjaan`;
+        document.getElementById('bargain-dialogue').innerHTML =
+          `<strong>${customer}:</strong> "Permisi Dek Kasir ${appState.studentName}, total belanja saya <strong>${formatRupiah(subtotal)}</strong>. Boleh saya tawar kurang <strong>${formatRupiah(discount)}</strong> sebagai langganan?"`;
+        document.getElementById('btn-verify-bargain').textContent = 'Sepakati Harga Pelanggan';
+      }
+    }
+
+    function proceedToBargain() {
+      if (appState.simRole !== 'buyer' || !isBuyerChecklistComplete()) return;
+      const subtotal = getCartSubtotal();
+      const mission = BUYER_MISSIONS[appState.buyerMissionIdx];
+
+      appState.bargainDiscount = mission.discount;
+      appState.agreedTotal = subtotal - mission.discount;
+      appState.kasirStage = 2;
+
+      setupBargainStageUI(subtotal, mission.discount);
+      updateKasirStageUI();
+      renderCart();
+      playClickTone(600, 0.1);
+    }
+
+    function verifyBargainPrice() {
+      const inputVal = parseRupiahInput(document.getElementById('bargain-input').value);
+      const fb = document.getElementById('bargain-feedback');
+      fb.classList.remove('hidden');
+
+      if (isNaN(inputVal)) {
+        fb.className = 'p-3 rounded-xl text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
+        fb.textContent = 'Masukkan angka harga kesepakatan baru terlebih dahulu!';
+        return;
+      }
+
+      if (inputVal === appState.agreedTotal) {
+        playClickTone(740, 0.15);
+        showToast(`Harga disepakati: ${formatRupiah(appState.agreedTotal)}! Sekarang uraikan nilai tempatnya.`, 'success');
+        appState.kasirStage = 3;
+
+        if (appState.simRole === 'buyer') {
+          document.getElementById('pv-step-tag').textContent = 'Langkah 3 dari 4 • POV Pembeli';
+          document.getElementById('pv-stage-title').textContent = 'Uraikan Nilai Tempat Total Belanjaanmu';
+        } else {
+          document.getElementById('pv-step-tag').textContent = 'Langkah 2 dari 3 • POV Penjual';
+          document.getElementById('pv-stage-title').textContent = 'Input Nilai Tempat pada Mesin Kasir';
+        }
+
+        document.getElementById('pv-target-display').textContent = formatRupiah(appState.agreedTotal);
+        for (let i = 0; i < 5; i++) {
+          document.getElementById(`pv-in-${i}`).value = '';
+        }
+        document.getElementById('pv-feedback').classList.add('hidden');
+        updateKasirStageUI();
+      } else {
+        playClickTone(240, 0.18);
+        const subtotal = getCartSubtotal();
+        fb.className = 'p-3 rounded-xl text-sm font-bold bg-rose-100 text-rose-900 border border-rose-300';
+        fb.textContent = `Belum pas! Hitung pengurangannya: ${formatRupiah(subtotal)} - ${formatRupiah(appState.bargainDiscount)}. Coba hitung lagi ya!`;
+      }
+    }
+
+    function verifyPlaceValue() {
+      const targetStr = String(appState.agreedTotal).padStart(5, '0');
+      const labels = ['Puluh Ribuan', 'Ribuan', 'Ratusan', 'Puluhan', 'Satuan'];
+      let allCorrect = true;
+      let wrongLabels = [];
+
+      for (let i = 0; i < 5; i++) {
+        const raw = document.getElementById(`pv-in-${i}`).value.trim();
+        const digit = raw === '' ? 0 : parseInt(raw, 10);
+        const expected = parseInt(targetStr[i], 10);
+        if (digit !== expected) {
+          allCorrect = false;
+          wrongLabels.push(labels[i]);
+        }
+      }
+
+      const fb = document.getElementById('pv-feedback');
+      fb.classList.remove('hidden');
+
+      if (allCorrect) {
+        playClickTone(760, 0.15);
+        showToast('Nilai tempat 5 digit tepat sekali! Lanjut ke tahap uang kembalian.', 'success');
+        prepareBuyerPaymentStage();
+      } else {
+        playClickTone(240, 0.18);
+        fb.className = 'p-3.5 rounded-xl text-sm font-bold bg-rose-100 text-rose-900 border border-rose-300';
+        fb.textContent = `Periksa kembali kotak: ${wrongLabels.join(', ')}. Ingat, total belanja adalah ${formatRupiah(appState.agreedTotal)} (${targetStr.split('').join(' - ')}).`;
+      }
+    }
+
+    function prepareBuyerPaymentStage() {
+      appState.kasirStage = 4;
+      appState.assembledChange = [];
+      const expectedChange = appState.buyerTotalPaid - appState.agreedTotal;
+
+      if (appState.simRole === 'buyer') {
+        document.getElementById('change-step-tag').textContent = 'Langkah 4 dari 4 • POV Pembeli';
+        document.getElementById('change-stage-title').textContent = 'Susun Pecahan Uang Kembalian yang Diterima';
+        document.getElementById('payment-visual-label').textContent = `Uang Saku dari Ibu yang Dibayarkan ${appState.studentName}:`;
+        document.getElementById('drawer-instruction').textContent = `Kembalian yang harus kamu terima adalah ${formatRupiah(expectedChange)}. Klik pecahan uang Rupiah di bawah untuk menyusunnya:`;
+        document.getElementById('assembled-label').textContent = 'Kembalian yang Kamu Susun:';
+        document.getElementById('btn-verify-change').textContent = 'Konfirmasi Uang Kembalian untuk Ibu';
+      } else {
+        const customer = SELLER_ORDERS[appState.sellerMissionIdx].customerName;
+        document.getElementById('change-step-tag').textContent = 'Langkah 3 dari 3 • POV Penjual';
+        document.getElementById('change-stage-title').textContent = `Susun Pecahan Uang Kembalian untuk ${customer}`;
+        document.getElementById('payment-visual-label').textContent = `Uang yang Dibayarkan ${customer}:`;
+        document.getElementById('drawer-instruction').textContent = `Kembalian untuk ${customer} adalah ${formatRupiah(expectedChange)}. Klik pecahan uang Rupiah di laci kasir untuk menyusunnya:`;
+        document.getElementById('assembled-label').textContent = 'Kembalian dari Laci Kasir:';
+        document.getElementById('btn-verify-change').textContent = `Serahkan Kembalian ke ${customer}`;
+      }
+
+      document.getElementById('buyer-payment-visual').innerHTML = appState.buyerPaymentBills.map(b => renderRupiahSVG(b, true)).join('');
+      document.getElementById('pay-summary-total').textContent = formatRupiah(appState.agreedTotal);
+      document.getElementById('pay-summary-paid').textContent = formatRupiah(appState.buyerTotalPaid);
+      document.getElementById('pay-summary-change-hint').textContent = formatRupiah(expectedChange);
+      document.getElementById('change-feedback').classList.add('hidden');
+
+      renderAssembledChange();
+      updateKasirStageUI();
+    }
+
+    function addChangeDenomination(val) {
+      playClickTone(580, 0.07);
+      appState.assembledChange.push(val);
+      renderAssembledChange();
+    }
+
+    function removeAssembledAt(index) {
+      playClickTone(360, 0.07);
+      appState.assembledChange.splice(index, 1);
+      renderAssembledChange();
+    }
+
+    function clearAssembledChange() {
+      appState.assembledChange = [];
+      renderAssembledChange();
+    }
+
+    function renderAssembledChange() {
+      const total = appState.assembledChange.reduce((a, b) => a + b, 0);
+      document.getElementById('assembled-change-total').textContent = formatRupiah(total);
+
+      const container = document.getElementById('assembled-change-list');
+      if (appState.assembledChange.length === 0) {
+        container.innerHTML = `<span class="text-xs text-gray-400 font-semibold">Belum ada pecahan uang yang dipilih...</span>`;
+      } else {
+        container.innerHTML = appState.assembledChange.map((val, idx) => `
+          <button onclick="removeAssembledAt(${idx})" title="Klik untuk menghapus pecahan ini"
+            class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-rose-100 text-emerald-950 hover:text-rose-900 border border-emerald-300 text-xs font-extrabold transition cursor-pointer">
+            ${formatRupiah(val)} &times;
+          </button>
+        `).join('');
+      }
+    }
+
+    function verifyChange() {
+      const expectedChange = appState.buyerTotalPaid - appState.agreedTotal;
+      const userChange = appState.assembledChange.reduce((a, b) => a + b, 0);
+      const fb = document.getElementById('change-feedback');
+      fb.classList.remove('hidden');
+
+      if (userChange === expectedChange) {
+        playClickTone(820, 0.2);
+        fb.className = 'p-4 rounded-2xl text-sm sm:text-base font-bold bg-emerald-100 text-emerald-950 border-2 border-emerald-400 space-y-3';
+
+        const successMsg = appState.simRole === 'buyer'
+          ? `Misi Selesai, <strong>${appState.studentName}</strong>! Kamu berhasil menyusun kembalian pas sebesar <strong>${formatRupiah(expectedChange)}</strong> (${formatRupiah(appState.buyerTotalPaid)} &minus; ${formatRupiah(appState.agreedTotal)}) untuk dibawa pulang ke Ibu!`
+          : `Kerja Bagus, Kasir <strong>${appState.studentName}</strong>! Kembalian sebesar <strong>${formatRupiah(expectedChange)}</strong> (${formatRupiah(appState.buyerTotalPaid)} &minus; ${formatRupiah(appState.agreedTotal)}) sudah pas diserahkan ke pelanggan!`;
+
+        const nextBtnLabel = appState.simRole === 'buyer' ? 'Ambil Misi Belanja Ibu Berikutnya →' : 'Layani Pelanggan Berikutnya →';
+        const switchRoleLabel = appState.simRole === 'buyer' ? 'Coba Jadi Penjual (Kasir)' : 'Coba Jadi Pembeli (Misi Ibu)';
+        const targetSwitchRole = appState.simRole === 'buyer' ? 'seller' : 'buyer';
+
+        fb.innerHTML = `
+          <div>${successMsg}</div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="nextRoleMission()" class="btn-3d px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm border-b-4 border-emerald-800 cursor-pointer">
+              ${nextBtnLabel}
+            </button>
+            <button onclick="switchSimRoleFromResult('${targetSwitchRole}')" class="btn-3d px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm border-b-4 border-amber-700 cursor-pointer">
+              ${switchRoleLabel}
+            </button>
+            <button onclick="navigateTo('kuis')" class="btn-3d px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm border-b-4 border-sky-800 cursor-pointer">
+              Lanjut ke Kuis (10 Soal)
+            </button>
+          </div>
+        `;
+      } else {
+        playClickTone(240, 0.2);
+        const diffHint = userChange < expectedChange ? 'masih kurang' : 'kelebihan';
+        fb.className = 'p-4 rounded-2xl text-sm sm:text-base font-bold bg-rose-100 text-rose-900 border-2 border-rose-400';
+        fb.textContent = `Kembalian yang kamu susun (${formatRupiah(userChange)}) ${diffHint} dari kembalian yang seharusnya (${formatRupiah(expectedChange)}). Sesuaikan pecahan uangnya ya!`;
+      }
+    }
+
+    function switchSimRoleFromResult(role) {
+      appState.simRole = role;
+      appState.povSelectedInSim = true;
+      syncPovGateVisibility();
+      loadMissionForCurrentRole();
+      playClickTone(600, 0.09);
+    }
+
+    // ---------------------------------------------------------
+    // 11. LOGIKA KUIS 10 SOAL & PEMBAHASAN BERTAHAN
+    // ---------------------------------------------------------
+    function renderQuizQuestion() {
+      appState.quizAnswered = false;
+      const q = QUIZ_QUESTIONS[appState.quizIdx];
+      const totalQ = QUIZ_QUESTIONS.length;
+
+      document.getElementById('quiz-progress-badge').textContent = `Soal ${appState.quizIdx + 1} / ${totalQ}`;
+      document.getElementById('quiz-score-badge').textContent = `Skor: ${appState.quizScore}`;
+      document.getElementById('quiz-progress-bar').style.width = `${((appState.quizIdx + 1) / totalQ) * 100}%`;
+      document.getElementById('quiz-indicator-tag').textContent = `Indikator: ${q.indicator}`;
+      document.getElementById('quiz-question-text').textContent = `${appState.quizIdx + 1}. ${q.question}`;
+
+      const letters = ['A', 'B', 'C', 'D'];
+      const optionsContainer = document.getElementById('quiz-options-container');
+      optionsContainer.innerHTML = q.options.map((opt, idx) => `
+        <button onclick="selectQuizOption(${idx})" id="quiz-opt-${idx}"
+          class="btn-3d w-full text-left p-4 rounded-2xl border-2 border-gray-200 hover:border-sky-500 hover:bg-sky-50 bg-white font-bold text-sm sm:text-base text-gray-800 flex items-start gap-3 transition cursor-pointer">
+          <span class="w-8 h-8 rounded-xl bg-sky-100 text-sky-900 font-display font-bold flex items-center justify-center shrink-0">${letters[idx]}</span>
+          <span class="pt-1">${opt}</span>
+        </button>
+      `).join('');
+
+      document.getElementById('quiz-explanation-box').classList.add('hidden');
+    }
+
+    function selectQuizOption(selectedIdx) {
+      if (appState.quizAnswered) return;
+      appState.quizAnswered = true;
+
+      const q = QUIZ_QUESTIONS[appState.quizIdx];
+      const isCorrect = selectedIdx === q.correct;
+
+      if (isCorrect) {
+        appState.quizScore += 10;
+        playClickTone(760, 0.15);
+      } else {
+        playClickTone(240, 0.2);
+      }
+
+      document.getElementById('quiz-score-badge').textContent = `Skor: ${appState.quizScore}`;
+
+      q.options.forEach((_, idx) => {
+        const btn = document.getElementById(`quiz-opt-${idx}`);
+        btn.disabled = true;
+        btn.classList.remove('hover:border-sky-500', 'hover:bg-sky-50', 'cursor-pointer');
+        if (idx === q.correct) {
+          btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-100 font-extrabold text-sm sm:text-base text-emerald-950 flex items-start gap-3';
+        } else if (idx === selectedIdx && !isCorrect) {
+          btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-100 font-bold text-sm sm:text-base text-rose-950 flex items-start gap-3';
+        } else {
+          btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 opacity-65 font-semibold text-sm sm:text-base text-gray-600 flex items-start gap-3';
+        }
+      });
+
+      const expBox = document.getElementById('quiz-explanation-box');
+      const fbTitle = document.getElementById('quiz-feedback-title');
+      const expText = document.getElementById('quiz-explanation-text');
+      const nextBtn = document.getElementById('btn-quiz-next');
+
+      expBox.classList.remove('hidden');
+      if (isCorrect) {
+        expBox.className = 'rounded-2xl p-4 sm:p-5 border-2 border-emerald-400 bg-emerald-50 text-emerald-950 space-y-3 animate-pop';
+        fbTitle.textContent = 'Jawabanmu Benar! (+10 Poin)';
+      } else {
+        expBox.className = 'rounded-2xl p-4 sm:p-5 border-2 border-rose-400 bg-rose-50 text-rose-950 space-y-3 animate-pop';
+        fbTitle.textContent = 'Jawaban Belum Tepat — Yuk Simak Pembahasannya!';
+      }
+
+      expText.innerHTML = `<strong>Pembahasan:</strong><br/>${q.explanation.replace(/\n/g, '<br/>')}`;
+      nextBtn.textContent = appState.quizIdx === QUIZ_QUESTIONS.length - 1
+        ? 'Lihat Hasil & Sertifikat Kelulusan →'
+        : 'Lanjut ke Soal Berikutnya →';
+    }
+
+    function nextQuizQuestion() {
+      if (appState.quizIdx < QUIZ_QUESTIONS.length - 1) {
+        appState.quizIdx += 1;
+        renderQuizQuestion();
+      } else {
+        showQuizCertificate();
+      }
+    }
+
+    function showQuizCertificate() {
+      document.getElementById('quiz-card').classList.add('hidden');
+      document.getElementById('quiz-result-card').classList.remove('hidden');
+
+      document.getElementById('cert-student-name').textContent = appState.studentName;
+      document.getElementById('cert-student-class').textContent = `Kelas ${appState.studentClass}`;
+      document.getElementById('cert-final-score').textContent = `${appState.quizScore} / 100`;
+
+      let predicate = 'Perlu Bimbingan';
+      if (appState.quizScore >= 90) predicate = 'Istimewa (Kasir Teladan)';
+      else if (appState.quizScore >= 80) predicate = 'Sangat Baik (Bintang Kasir)';
+      else if (appState.quizScore >= 70) predicate = 'Baik (Kasir Terampil)';
+      else predicate = 'Cukup (Terus Berlatih!)';
+
+      document.getElementById('cert-predicate').textContent = predicate;
+
+      const today = new Date();
+      document.getElementById('cert-date').textContent = `Tanggal: ${today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+      playClickTone(880, 0.25);
+    }
+
+    function restartQuiz() {
+      appState.quizIdx = 0;
+      appState.quizScore = 0;
+      appState.quizAnswered = false;
+      document.getElementById('quiz-result-card').classList.add('hidden');
+      document.getElementById('quiz-card').classList.remove('hidden');
+      renderQuizQuestion();
+    }
+
+    // ---------------------------------------------------------
+    // 12. INISIALISASI SAAT HALAMAN SELESAI DIMUAT
+    // ---------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+      switchMateriTab('etno');
+      initMateriContent();
+      initKasirUI();
+      renderQuizQuestion();
+
+      document.getElementById('input-student-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') startApplication();
+      });
+    });
+  </script>
+</body>
+</html>
